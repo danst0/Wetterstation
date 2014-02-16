@@ -1,0 +1,101 @@
+body {
+	font-family:Verdana;
+	font-size:16px;
+	font-style:normal;
+	margin: 10px;
+/* 
+	padding: 10px;
+	border:1px solid #ddd;
+ */
+}
+
+h2 {
+	font-size:16px;
+}
+
+.picture {
+/*     width: 230px; */
+}
+
+#header,
+#content,
+#footer {
+    width: 774px; /* (250+10)*3 + Border = 774px; */
+    margin: 0 auto;
+}
+
+.description_text {
+    font-size:10px;
+	font-style: bold;
+    margin-bottom: 0.2em;
+    margin-top: 1em;
+}
+.value_text {
+    display: inline-block;
+}
+
+.unit_text {
+    display: inline-block;
+    position: relative;
+    top: -0.8em;
+    left: -0.7em;
+    font-size: 60%;
+
+}
+#camera,
+#temperature,
+#pressure {
+    width: 510px;
+}
+#header,
+#footer {
+    text-align:center;
+}
+#camera,
+#humidity,
+#light {
+    margin: 0 0 10px 0;
+}
+
+
+.datenblock {
+/*     border:1px solid red; */
+    width: 250px;
+    height: 250px;
+	border: 1px solid #ddd;
+	display: inline-block;
+	text-align:center;
+	margin: 0 10px 10px 0;
+	box-shadow: 5px 5px 7px 0px #ddd;
+    position: relative;
+    float: left;
+}
+
+.topright {
+	position: absolute;
+	bottom:0px;
+	right:0px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.selection, 
+.reload{
+/*     box-shadow: 2px 2px 4px 0px #ddd; */
+	text-indent:0px;
+	border:1px solid #ddd;
+	display:inline-block;
+	color:#666666;
+    font-weight:bold;
+	height:25px;
+	line-height:25px;
+	width:140px;
+	text-decoration:none;
+	text-align:center;
+}
+
+#footer {
+	font-size:8px;
+	font-style:normal;
+/* 	margin: 10px; */
+}

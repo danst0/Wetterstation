@@ -1,0 +1,222 @@
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="static/style.css">
+<script type="text/javascript" src="static/jquery-1.11.0.min.js"></script>
+<script type="text/javascript">
+            var linkData = [
+            [
+                ['static/1.png','www.url1.com'],
+                ['static/2.png','www.url2.com'],
+                ['static/3.png','www.url2.com'],
+                ['static/4.png','www.url2.com'],
+                ['static/5.png','www.url2.com'],
+                ['static/6.png','www.url2.com'],
+                ['static/7.png','www.url3.com']
+            ],
+            [
+                ['static/1.png','www.url1.com'],
+                ['static/2.png','www.url2.com'],
+                ['static/3.png','www.url2.com'],
+                ['static/4.png','www.url2.com'],
+                ['static/5.png','www.url2.com'],
+                ['static/6.png','www.url2.com'],
+                ['static/7.png','www.url3.com']
+            ],
+            [
+                ['static/1.png','www.url1.com'],
+                ['static/2.png','www.url2.com'],
+                ['static/3.png','www.url2.com'],
+                ['static/4.png','www.url2.com'],
+                ['static/5.png','www.url2.com'],
+                ['static/6.png','www.url2.com'],
+                ['static/7.png','www.url3.com']
+            ],
+            [
+                ['static/1.png','www.url1.com'],
+                ['static/2.png','www.url2.com'],
+                ['static/3.png','www.url2.com'],
+                ['static/4.png','www.url2.com'],
+                ['static/5.png','www.url2.com'],
+                ['static/6.png','www.url2.com'],
+                ['static/7.png','www.url3.com']
+            ]]
+            // preload the pics
+            
+            var picO = new Array();
+            for(i=0; i < linkData.length; i++) {
+                picO[i] = new Array()
+            };
+            
+            for(i=0; i < linkData.length; i++){
+                for(j=0; j < linkData[i].length; j++){
+                    picO[i][j] = new Image();
+                    picO[i][j].src = linkData[i][j][0];
+                };
+            };
+            
+            function show(name, val) {
+                document.getElementById('picture'+name).src = picO[name-1][val-1].src;
+                document.getElementById('caption'+name).href = linkData[name-1][val-1][1];
+                localStorage["pic_no_"+name] = val;
+            };
+            
+            window.onload=function() {
+                for(i=1; i <= linkData.length; i++) {
+                    var pic_no = localStorage["pic_no_"+i];
+                    if (pic_no == null) {
+                        pic_no = 1;
+                    };
+                    $("#select"+i).val(pic_no).change();
+//                     document.getElementById("select2").selectedIndex = 2;
+                    show(i, pic_no);
+                };                
+                $.ajax({
+                    type:'get',
+                    url:'http://localhost/cgi/testcgi.py',
+                    success:function(data) {
+//                          alert(data);
+                    }
+                });
+                $("#daten").load("currentdata.html");
+            };
+            // Hierdurch wird die window.onload funktion aufgerufen, dadurch werden die datenaktualisiert (Hier klappt der abruf des CGI Skripts nicht)            
+            $(document).ready(function() {
+                $("#current_data_reload").on("click", function() {
+                    $("#daten").load("currentdata.html");
+                });
+            });
+</script>            
+
+<title>D3-Wetterstation</title>
+</head>
+<body>
+
+<div id="header">
+    <h1>
+<!--         <a href="/"> -->
+            D<sup>3</sup>-Wetterstation
+<!--         </a> -->
+    </h1>
+</div>
+
+<div id="content">
+
+<div id="current_data" class="datenblock">
+    <h2>Aktuelle Daten</h2>
+    <div class="topright">
+        <a id="current_data_reload" href="#" class="reload">Neu laden</a>
+    </div>
+    <div id="daten" class="picture">
+    </div>
+</div>
+
+<div id="camera" class="datenblock">
+    <h2>Kamera</h2>
+    <div class="topright">
+        <a id="camera_reload" href="#" class="reload">Neu laden</a>
+    </div>
+    <div class="picture">
+        <img height=100 src="static/1.png" />
+    </div>
+</div>
+
+<div id="temperature" class="datenblock">
+<h2>Temperatur</h2>
+<div class="topright">
+<select onchange="show(1, this.value);" id="select1" class="selection">
+    <option value="1">Letzten 60 Minuten</option>
+    <option value="2">Letzten 24 Stunden</option>
+    <option value="3">Letzte Woche</option>
+    <option value="4">Letzter Monat</option>
+    <option value="5">Letztes Quartal</option>
+    <option value="6">Letztes Jahr</option>        
+    <option value="7">Alle Daten</option>        
+</select>
+</div>
+    <div class="picture">
+
+        <a id="caption1" href=""><img height=100 id="picture1" src="" /></a>
+    </div>
+</div>
+
+<div id="humidity" class="datenblock">
+<h2>Feuchtigkeit</h2>
+<div class="topright">
+    <select onchange="show(2, this.value);" id="select2" class="selection">
+        <option value="1">Letzten 60 Minuten</option>
+        <option value="2">Letzten 24 Stunden</option>
+        <option value="3">Letzte Woche</option>
+        <option value="4">Letzter Monat</option>
+        <option value="5">Letztes Quartal</option>
+        <option value="6">Letztes Jahr</option>        
+        <option value="7">Alle Daten</option>        
+    </select>
+</div>
+    <div class="picture">
+
+        <a id="caption2" href=""><img height=100 id="picture2" src="" /></a>
+
+    </div>
+</div>
+
+
+<div id="pressure" class="datenblock">
+    <h2>Luftdruck</h2>
+    <div class="topright">
+        <select id="select3" onchange="show(3, this.value);" class="selection">
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzte Woche</option>
+            <option value="4">Letzter Monat</option>
+            <option value="5">Letztes Quartal</option>
+            <option value="6">Letztes Jahr</option>        
+            <option value="7">Alle Daten</option>        
+        </select>
+    </div>
+    <div class="picture">
+
+        <a id="caption3" href=""><img height=100 id="picture3" src="" /></a>
+
+    </div>
+</div>
+
+<div id="light" class="datenblock">
+    <h2>Helligkeit</h2>
+    <div class="topright">
+        <select id="select4" onchange="show(4, this.value);" class="selection">
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzte Woche</option>
+            <option value="4">Letzter Monat</option>
+            <option value="5">Letztes Quartal</option>
+            <option value="6">Letztes Jahr</option>        
+            <option value="7">Alle Daten</option>        
+        </select>
+    </div>
+    <div class="picture">
+
+        <a id="caption4" href=""><img height=100 id="picture4" src="" /></a>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+<div id="footer">
+Dies ist die D<sup>3</sup>-Wetterstation aktueller Standort ist in Düsseldorf. Die oben genannten Werte werden seit dem 31.3.2014 systematisch erfasst.
+
+</div>
+
+</body>
+
+</html>
