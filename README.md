@@ -1,3 +1,5 @@
+Die Software ist in einem frühen alpha-Status und wird ohne weitere Ergänzungen nicht funktionieren.
+
 Wetterstation
 ===
 
