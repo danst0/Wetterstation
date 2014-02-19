@@ -31,12 +31,38 @@ class Sensors:
             print('Serieller Port nicht gefunden (' + self.com_port + ')')
             print('Vorhandene Ports: ' + ', '.join(ports))
             sys.exit(1)
-        self.serial = serial.serial(self.com_port, 115200)
+        try:
+            self.serial = serial.Serial(self.com_port, 115200)
+            self.serial.close()
+        except:
+            print 'Serial: Sollte noch gar nicht funktionieren'
         
         self.read_radio()
-        
+        self.read_i2c()
     def read_radio(self):
-        pass
+        #string = '$1;1;;;;;;13,0;;;;;;;;58;;;;18,9;39;0,0;2680;0;0'
+        string = '$1;1;;;;;;'+self.random_temp()+';;;;;'+self.random_temp()+';;;;;;;'+self.random_temp()+';;'+self.random_temp()+';;;0'
+# Check for completeness
+        if string[:6] != '$1;1;;' or string[-2:] != ';0':
+            return None
+            # should be exception
+        fields = string.split(';')
+#         pprint(fields)
+#         print fields[8]
+        self.temperature1 = float(fields[7].replace(',','.'))
+        self.humidity1 = float(fields[12].replace(',','.'))
+        self.temperature2 = float(fields[19].replace(',','.'))
+        self.humidity2 = float(fields[21].replace(',','.'))
+        
+    def read_i2c(self):
+        self.temperature_server = self.random_temp()
+        self.pressure_server = self.random_temp()
+        self.temperature_outside = self.random_temp()
+        self.pressure_outside = self.random_temp()
+        self.light_outside = self.random_temp()
+        
+    def random_temp(self):
+        return str(round(((random.random()-0.2/0.5)*0.5)*100, 2)).replace('.',',')
         
     def write_to_file(self):
         filename = 'currentdata.html'
