@@ -12,6 +12,7 @@ class Database:
     file = 'weather.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
+        self.con.text_factory = str
         self.cur = self.con.cursor()
         if not self.check_database():
             self.generate_tables()
@@ -27,9 +28,13 @@ class Database:
             return False
         else:
             return True
-    
+    def add_all(self, list):
+        for first_key in list.keys():
+            for sec_key in list[first_key].keys():
+                self.add(first_key, sec_key, list[first_key][sec_key])
     def add(self, raum, art, wert):
         now = datetime.datetime.now()
+#         print 'INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert)
         self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert))
     
     def choose(self, von, bis, raum, art):
