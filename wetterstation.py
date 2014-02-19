@@ -18,13 +18,14 @@ import serial
 from serial.tools.list_ports import *
 import cgitb
 # cgitb.enable()
+import pylab
 
 full_base_path = '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
 
 
 
 class Sensors:
-    daten={'Server': {}, 'Raum1': {}, 'Raum2': {}, 'Außen': {}}
+    daten={'Server': {}, 'Raum1': {}, 'Raum2': {}, u'Außen': {}}
     def __init__(self):
         self.com_port = '/dev/tty.Bluetooth-Modem'
         ports = map(lambda x: x[0], comports())
@@ -65,9 +66,9 @@ class Sensors:
     def read_i2c(self):
         self.daten['Server']['Temperatur'] = self.random_temp()
         self.daten['Server']['Luftdruck'] = self.random_temp()
-        self.daten['Außen']['Temperatur'] = self.random_temp()
-        self.daten['Außen']['Luftdruck'] = self.random_temp()
-        self.daten['Außen']['Licht'] = self.random_temp()
+        self.daten[u'Außen']['Temperatur'] = self.random_temp()
+        self.daten[u'Außen']['Luftdruck'] = self.random_temp()
+        self.daten[u'Außen']['Licht'] = self.random_temp()
         return True
         
     def random_temp_str(self):
@@ -87,15 +88,14 @@ class Sensors:
 #             print line,
             if previous_line.find('value_text') != -1:
                 if current_section == 'Temperatur':
-                    line = ' ' *4 + str(int(self.daten['Außen'][current_section]))
+                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
                 elif current_section == 'Luftdruck':
-                    line = ' ' *4 + str(int(self.daten['Außen'][current_section]))
+                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
                 elif current_section == 'Feuchtigkeit':
                     line = ' ' *4 + str(int(self.daten['Raum1'][current_section]))
                 elif current_section == 'Helligkeit':
-                    line = ' ' *4 + str(int(self.daten['Außen'][current_section]))
+                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
                 line += '\n'
-
             if line.find('Temperatur') != -1:
                 current_section = 'Temperatur'
             elif line.find('Luftdruck') != -1:
@@ -111,10 +111,48 @@ class Sensors:
         f.close()
                                 
 class Graphs:
-    def base_graph(self, von, bis, basename, date_format_string): 
-        daten = d.choose(von, bis, 'Server', 'Temperatur')
+
+    def aggregate_graph(self, von, bis, raeume, arten, basename, date_format_string): 
+#         all_data = []
+#         for raum in raeume:
+#             for art in arten:
+#                 print raum, art
+#                 daten = d.choose(von, bis, raum, art)
+#                 all_data = all_data + daten['roh']
+#         pprint(all_data)
+        if all_data != []:
+#             pprint(daten)
+            
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            # War mal '%Y-%m-%d %H:%M:%S'
+            xfmt = md.DateFormatter(date_format_string)
+            ax.xaxis.set_major_formatter(xfmt)
+            fig.autofmt_xdate()
+            plt.xlabel('Datum/Uhrzeit')
+            plt.ylabel(art)
+            plt.figtext(.5,.05,(u'Schönes Diagramm'), fontsize=18, ha='center')
+            plt.grid(True)
+
+            for raum in raeume:
+                for art in arten:  
+#                     plt.subplot(111)
+                    daten = d.choose(von, bis, raum, art)
+                    list_of_datetimes = map(lambda x: x[0], daten['roh'])
+                    datum = matplotlib.dates.date2num(list_of_datetimes)   
+                    inhalt = map(lambda x: x[3], daten['roh'])
+                    plt.plot(datum, inhalt, label=raum+':'+art, marker='.')
+            plt.legend(loc='best')
+
+            plt.show()
+            print full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png'
+            fig.savefig(full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png')
+            plt.close()
+    def base_graph(self, von, bis, raum, art, basename, date_format_string): 
+        daten = d.choose(von, bis, raum, art)
         if daten['roh'] != []:
-#             print daten
+#             pprint(daten)
             list_of_datetimes = map(lambda x: x[0], daten['roh'])
             datum = matplotlib.dates.date2num(list_of_datetimes)
         
@@ -128,20 +166,27 @@ class Graphs:
             fig.autofmt_xdate()
             ax.plot(datum, inhalt)
             plt.show()
-            fig.savefig(full_base_path + 'static/graph ' + basename + '.png')
+            print 'Speichere: ' + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png'
+#             fig.savefig(full_base_path + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png')
+            plt.close()
 
+    def generate_graphs(self):
+#         print d.get_distinct_art()
+        for art in d.get_distinct_art():
+            print art
+            for raum in d.get_distinct_raum():
+                self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), raum, art, '1 Stunde', '%H:%M')     
+                self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, art, '24 Stunden', '%H:%M')
 
-    def last_hour(self):
-        self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), 'Temperatur letzte Stunde', '%H:%M')
-        
-    def last_day(self):
-        self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), 'Temperatur letzten 24-Stunden', '%H:%M')
+            self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M')
+            self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M')
+            
         
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Wetterstation')
-    parser.add_argument('--update', action='store_true', help='update database with latest data')
-    parser.add_argument('--graphs', action='store_true', help='generate graphs depending on last update')
+    parser.add_argument('--update', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
+    parser.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
     args = parser.parse_args()
     print(args)
 # Basisobjekte
@@ -152,18 +197,16 @@ if __name__ == '__main__':
         d.add_all(s.daten)
 #         d.add('Server', 'Temperatur', random.random()*30)
         d.con.commit()
-        print(d.get_latest('Server', 'Temperatur'))
+#         print(d.get_latest('Server', 'Temperatur'))
         s.write_to_file()
-    elif args.graphs:
+    if args.diagramme:
 # Generate Graphs
         g = Graphs()
-        g.last_hour()
-        g.last_day()
-    else:
+        g.generate_graphs()
+    if not args.update and not args.diagramme:
         # Wir wurden ohne Parameter aufgerufen -> CGI Modus
         g = Graphs()
-        g.last_hour()
-        g.last_day()
+        g.generate_graphs()
         
     print("Beende Wetterstation")
     

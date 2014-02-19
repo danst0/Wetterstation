@@ -9,10 +9,10 @@ import random
 
 
 class Database:
-    file = 'weather.sqlite3'
+    file = 'wetter.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
-        self.con.text_factory = str
+#         self.con.text_factory = str
         self.cur = self.con.cursor()
         if not self.check_database():
             self.generate_tables()
@@ -40,7 +40,7 @@ class Database:
     def choose(self, von, bis, raum, art):
         self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=?', (raum, art))
         liste = filter(lambda x: x[0]<bis and x[0]>=von, self.cur.fetchall())
-        pprint(liste)
+#         pprint(liste)
         if len(liste) != 0:
             maximum_wert = max(map(lambda x: x[3], liste))
             minimum_wert = min(map(lambda x: x[3], liste))
@@ -51,6 +51,13 @@ class Database:
             durchschnitt_wert = None
         return {'roh': liste, 'min': minimum_wert, 'max': maximum_wert, 'durchschnitt': durchschnitt_wert}
 
+    def get_distinct_raum(self):
+        self.cur.execute('SELECT DISTINCT raum FROM weather')
+        return map(lambda x: x[0], self.cur.fetchall())
+
+    def get_distinct_art(self):
+        self.cur.execute('SELECT DISTINCT art FROM weather')
+        return map(lambda x: x[0], self.cur.fetchall())
 
     
     def get_latest(self, raum, art):
