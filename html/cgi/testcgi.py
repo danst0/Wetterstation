@@ -8,7 +8,7 @@ cgitb.enable()
 
 #print "Content-type: text/plain\n\n"
 #print "testing...\n"
-subprocess.Popen('/Users/danst/Documents/Archiv/Computer-Elektronik/wetterstation.py', '--update')
+subprocess.Popen('/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/wetterstation.py', '--update')
 #open('testfile', 'a').close()
 print "Content-Type: text/plain;charset=utf-8"
 print
