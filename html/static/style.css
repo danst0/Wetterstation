@@ -94,6 +94,14 @@ h2 {
 	text-align:center;
 }
 
+img.diagramm {
+/*     position: relative; */
+    
+    width: 90%;
+    height: auto;
+/*     height: 80%; */
+}
+
 #footer {
 	font-size:8px;
 	font-style:normal;

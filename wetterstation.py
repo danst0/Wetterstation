@@ -18,7 +18,7 @@ import serial
 from serial.tools.list_ports import *
 import cgitb
 # cgitb.enable()
-import pylab
+# import pylab
 
 full_base_path = '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
 
@@ -93,7 +93,7 @@ class Sensors:
                     line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
                 elif current_section == 'Feuchtigkeit':
                     line = ' ' *4 + str(int(self.daten['Raum1'][current_section]))
-                elif current_section == 'Helligkeit':
+                elif current_section == 'Licht':
                     line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
                 line += '\n'
             if line.find('Temperatur') != -1:
@@ -103,7 +103,7 @@ class Sensors:
             elif line.find('Feuchtigkeit') != -1:  
                 current_section = 'Feuchtigkeit'
             elif line.find('Helligkeit') != -1:  
-                current_section = 'Helligkeit'
+                current_section = 'Licht'
             
             previous_line = line  
 #             print line,  
@@ -111,45 +111,62 @@ class Sensors:
         f.close()
                                 
 class Graphs:
+    font = {
+        'family' : 'sans-serif',
+        'weight' : 'ultralight',
+        'size'   : 9}
 
-    def aggregate_graph(self, von, bis, raeume, arten, basename, date_format_string): 
-#         all_data = []
-#         for raum in raeume:
-#             for art in arten:
-#                 print raum, art
-#                 daten = d.choose(von, bis, raum, art)
-#                 all_data = all_data + daten['roh']
-#         pprint(all_data)
-        if all_data != []:
-#             pprint(daten)
-            
+    def aggregate_data(self, datum, inhalt, von, bis):
+        zeitspanne = bis - von
+        abstand = zeitspanne/200
+        print abstand
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            # War mal '%Y-%m-%d %H:%M:%S'
-            xfmt = md.DateFormatter(date_format_string)
-            ax.xaxis.set_major_formatter(xfmt)
-            fig.autofmt_xdate()
-            plt.xlabel('Datum/Uhrzeit')
-            plt.ylabel(art)
-            plt.figtext(.5,.05,(u'Schönes Diagramm'), fontsize=18, ha='center')
-            plt.grid(True)
+        return datum, inhalt
 
-            for raum in raeume:
-                for art in arten:  
-#                     plt.subplot(111)
-                    daten = d.choose(von, bis, raum, art)
-                    list_of_datetimes = map(lambda x: x[0], daten['roh'])
-                    datum = matplotlib.dates.date2num(list_of_datetimes)   
-                    inhalt = map(lambda x: x[3], daten['roh'])
-                    plt.plot(datum, inhalt, label=raum+':'+art, marker='.')
+    def aggregate_graph(self, von, bis, raeume, arten, basename, date_format_string, groesse=(8,4), hd=False): 
+        if hd:
+            details=800
+            basename = basename + '_hd'
+            self.font['size'] = 5
+        else:
+            details=200
+            self.font['size'] = 9
+        matplotlib.rc('font', **self.font)
+        fig = plt.figure(figsize=groesse, dpi=details)
+        ax = fig.add_subplot(111)
+        # War mal '%Y-%m-%d %H:%M:%S'
+        xfmt = md.DateFormatter(date_format_string)
+        ax.xaxis.set_major_formatter(xfmt)
+        fig.autofmt_xdate()
+        plt.xlabel('Datum/Uhrzeit')
+        plt.grid(True)
+
+        for raum in raeume:
+            for art in arten:  
+                plt.ylabel(art)
+                daten = d.choose(von, bis, raum, art)
+                list_of_datetimes = map(lambda x: x[0], daten['roh'])
+                datum = matplotlib.dates.date2num(list_of_datetimes)   
+                inhalt = map(lambda x: x[3], daten['roh'])
+                datum, inhalt = self.aggregate_data(datum, inhalt, von, bis)
+                if inhalt != []:
+                    plt.plot(datum, inhalt, label=raum, marker='.')
+        if hd:
             plt.legend(loc='best')
-
-            plt.show()
-            print full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png'
-            fig.savefig(full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png')
-            plt.close()
-    def base_graph(self, von, bis, raum, art, basename, date_format_string): 
+            fig.suptitle(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis), fontsize=8)
+#             plt.figtext(0.5,0.05,(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis)), fontsize=10, ha='center')            
+        else:
+            plt.legend(loc='upper left')
+        plt.show()
+#         pfad = full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png'
+        pfad = full_base_path + 'html/diagramme/' + u'Räume' + '_' + ''.join(arten) + '_' + basename + '.png'
+#         print pfad
+        fig.savefig(pfad)
+        plt.close()
+        
+    def base_graph(self, von, bis, raum, art, basename, date_format_string):
+        self.font['size'] = 9
+        matplotlib.rc('font', **self.font)
         daten = d.choose(von, bis, raum, art)
         if daten['roh'] != []:
 #             pprint(daten)
@@ -166,20 +183,29 @@ class Graphs:
             fig.autofmt_xdate()
             ax.plot(datum, inhalt)
             plt.show()
-            print 'Speichere: ' + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png'
+#             print 'Speichere: ' + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png'
 #             fig.savefig(full_base_path + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png')
             plt.close()
 
     def generate_graphs(self):
 #         print d.get_distinct_art()
+        print 'Generiere Diagramme'
         for art in d.get_distinct_art():
             print art
             for raum in d.get_distinct_raum():
                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), raum, art, '1 Stunde', '%H:%M')     
                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, art, '24 Stunden', '%H:%M')
-
-            self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M')
-            self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M')
+            size = (7,2)
+            if art in ['Licht', 'Feuchtigkeit']:
+                size = (3,2)
+            for details in [False, True]:
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), d.get_distinct_raum(), (art,), '7 Tage', '%Y-%m-%d', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), d.get_distinct_raum(), (art,), '30 Tage', '%Y-%m-%d', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Quartal', '%Y-%m-%d', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Jahr', '%Y-%m-%d', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), d.get_distinct_raum(), (art,), 'Alles', '%Y-%m-%d', groesse=size, hd=details)
             
         
 if __name__ == '__main__':
