@@ -5,43 +5,59 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="stylesheet" type="text/css" href="static/style.css">
 <script type="text/javascript" src="static/jquery-1.11.0.min.js"></script>
+<!-- 
+Temperatur
+Humidity
+Pressure
+Light
+ -->
+<!-- 
+Letzten 60 Minuten
+Letzten 24 Stunden
+Letzte Woche
+Letzter Monat
+Letztes Quartal
+Letztes Jahr
+Alle Daten
+ -->
+
 <script type="text/javascript">
-            var linkData = [
+        var linkData = [
             [
-                ['static/1.png','www.url1.com'],
-                ['static/2.png','www.url2.com'],
-                ['static/3.png','www.url2.com'],
-                ['static/4.png','www.url2.com'],
-                ['static/5.png','www.url2.com'],
-                ['static/6.png','www.url2.com'],
-                ['static/7.png','www.url3.com']
+                'diagramme/Räume_Temperatur_1 Stunde',
+                'diagramme/Räume_Temperatur_24 Stunden',
+                'diagramme/Räume_Temperatur_7 Tage',
+                'diagramme/Räume_Temperatur_30 Tage',
+                'diagramme/Räume_Temperatur_1 Quartal',
+                'diagramme/Räume_Temperatur_1 Jahr',
+                'diagramme/Räume_Temperatur_Alles'
             ],
             [
-                ['static/1.png','www.url1.com'],
-                ['static/2.png','www.url2.com'],
-                ['static/3.png','www.url2.com'],
-                ['static/4.png','www.url2.com'],
-                ['static/5.png','www.url2.com'],
-                ['static/6.png','www.url2.com'],
-                ['static/7.png','www.url3.com']
+                'diagramme/Räume_Feuchtigkeit_1 Stunde',
+                'diagramme/Räume_Feuchtigkeit_24 Stunden',
+                'diagramme/Räume_Feuchtigkeit_7 Tage',
+                'diagramme/Räume_Feuchtigkeit_30 Tage',
+                'diagramme/Räume_Feuchtigkeit_1 Quartal',
+                'diagramme/Räume_Feuchtigkeit_1 Jahr',
+                'diagramme/Räume_Feuchtigkeit_Alles'
             ],
             [
-                ['static/1.png','www.url1.com'],
-                ['static/2.png','www.url2.com'],
-                ['static/3.png','www.url2.com'],
-                ['static/4.png','www.url2.com'],
-                ['static/5.png','www.url2.com'],
-                ['static/6.png','www.url2.com'],
-                ['static/7.png','www.url3.com']
+                'diagramme/Räume_Luftdruck_1 Stunde',
+                'diagramme/Räume_Luftdruck_24 Stunden',
+                'diagramme/Räume_Luftdruck_7 Tage',
+                'diagramme/Räume_Luftdruck_30 Tage',
+                'diagramme/Räume_Luftdruck_1 Quartal',
+                'diagramme/Räume_Luftdruck_1 Jahr',
+                'diagramme/Räume_Luftdruck_Alles'
             ],
             [
-                ['static/1.png','www.url1.com'],
-                ['static/2.png','www.url2.com'],
-                ['static/3.png','www.url2.com'],
-                ['static/4.png','www.url2.com'],
-                ['static/5.png','www.url2.com'],
-                ['static/6.png','www.url2.com'],
-                ['static/7.png','www.url3.com']
+                'diagramme/Räume_Licht_1 Stunde',
+                'diagramme/Räume_Licht_24 Stunden',
+                'diagramme/Räume_Licht_7 Tage',
+                'diagramme/Räume_Licht_30 Tage',
+                'diagramme/Räume_Licht_1 Quartal',
+                'diagramme/Räume_Licht_1 Jahr',
+                'diagramme/Räume_Licht_Alles'
             ]]
             // preload the pics
             
@@ -53,13 +69,16 @@
             for(i=0; i < linkData.length; i++){
                 for(j=0; j < linkData[i].length; j++){
                     picO[i][j] = new Image();
-                    picO[i][j].src = linkData[i][j][0];
+                    picO[i][j].src = linkData[i][j] + '.png';
                 };
             };
             
             function show(name, val) {
                 document.getElementById('picture'+name).src = picO[name-1][val-1].src;
-                document.getElementById('caption'+name).href = linkData[name-1][val-1][1];
+//                 alert(picO[name-1][val-1].src);
+//                 ,"javascript:window.open('diagramme/Räume_Temperatur_1 Stunde_hd.png','_blank','toolbar=no,menubar=no,resizable=yes,scrollbars=yes')"],
+                document.getElementById('caption'+name).href=
+                "javascript:window.open('" + picO[name-1][val-1].src.substring(0, picO[name-1][val-1].src.length-4) + "_hd.png" + "','_blank','toolbar=no,menubar=no,resizable=yes,scrollbars=yes');";
                 localStorage["pic_no_"+name] = val;
             };
             
@@ -138,7 +157,7 @@
 </div>
     <div class="picture">
 
-        <a id="caption1" href=""><img height=100 id="picture1" src="" /></a>
+        <a id="caption1" href=""><img class="diagramm" id="picture1" src="" /></a>
     </div>
 </div>
 
@@ -157,7 +176,7 @@
 </div>
     <div class="picture">
 
-        <a id="caption2" href=""><img height=100 id="picture2" src="" /></a>
+        <a id="caption2" href=""><img class="diagramm" id="picture2" src="" /></a>
 
     </div>
 </div>
@@ -178,7 +197,7 @@
     </div>
     <div class="picture">
 
-        <a id="caption3" href=""><img height=100 id="picture3" src="" /></a>
+        <a id="caption3" href=""><img class="diagramm" id="picture3" src="" /></a>
 
     </div>
 </div>
@@ -198,22 +217,17 @@
     </div>
     <div class="picture">
 
-        <a id="caption4" href=""><img height=100 id="picture4" src="" /></a>
+        <a id="caption4" href=""><img class="diagramm" id="picture4" src="" /></a>
     </div>
 
 </div>
 
 
 
-
-
-
-
-
 </div>
 
 <div id="footer">
-Dies ist die D<sup>3</sup>-Wetterstation aktueller Standort ist in Düsseldorf. Die oben genannten Werte werden seit dem 31.3.2014 systematisch erfasst.
+Dies ist die D<sup>3</sup>-Wetterstation. Aktueller Standort ist in Düsseldorf-Gerresheim. Die oben genannten Werte werden seit dem 31.3.2014 systematisch erfasst.
 
 </div>
 
