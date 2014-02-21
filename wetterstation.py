@@ -16,6 +16,7 @@ import database
 import camera_remote
 import serial
 from serial.tools.list_ports import *
+import copy
 import cgitb
 # cgitb.enable()
 # import pylab
@@ -116,18 +117,66 @@ class Graphs:
         'weight' : 'ultralight',
         'size'   : 9}
 
-    def aggregate_data(self, datum, inhalt, von, bis):
-        zeitspanne = bis - von
-        abstand = zeitspanne/200
-        print abstand
+    def aggregate_data(self, daten, dauer):
+#         updatefrequenz: 3 min -> 20 Werte pro Stunde
+#         60 min -> nicht (20 Werte)
+#         24h -> 30 min (48)
+#         1 Woche -> 3h (56)
+#         1 Monat -> 12 h (60)
+#         1 Quartal -> 48 h (45)
+#         1 Jahr -> 6 Tage (60)
+#         Alles -> ?
+        if daten == []:
+            return []
+        neue_daten = []
+#         print dauer
+        if dauer.startswith('1 Stunde'):
+            neue_daten = copy.deepcopy(daten)
+        elif dauer.startswith('24 Stunden'):
+            
+            pprint(daten)
 
-        return datum, inhalt
+            first_point = daten[0][0]
+#             print first_point
+            viertel_stunde = int(round((first_point.minute)/60.0*2, 0)/2.0*60)
+            first_point = first_point.replace(minute=viertel_stunde, second=0, microsecond=0)
+#             print first_point
+            times = []
+            for i in range(48):
+                times.append(first_point + datetime.timedelta(minutes=30*i))
+            pprint(times)
+            sys.exit()
+            for time in times:
+                counter = 0
+                i = 0
+                average = 0
+                while i < len(daten):
+                    datum = daten[i]
+                    if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
+                        del daten[i]
+                        counter += 1
+                        average += datum[3]
+                    i += 1
+                if counter > 0:
+                    average = average/float(counter)
+                neue_daten.append((time, daten[0][1], daten[0][2], average))
+        else:
+            neue_daten = copy.deepcopy(daten)            
+
+                
+              
+#             pprint (neue_daten)
+
+#             print viertel_stunde
+            
+#             sys.exit()
+        return neue_daten
 
     def aggregate_graph(self, von, bis, raeume, arten, basename, date_format_string, groesse=(8,4), hd=False): 
         if hd:
-            details=800
+            details=200
             basename = basename + '_hd'
-            self.font['size'] = 5
+            self.font['size'] = 9
         else:
             details=200
             self.font['size'] = 9
@@ -135,30 +184,31 @@ class Graphs:
         fig = plt.figure(figsize=groesse, dpi=details)
         ax = fig.add_subplot(111)
         # War mal '%Y-%m-%d %H:%M:%S'
+        ax.xaxis_date()
         xfmt = md.DateFormatter(date_format_string)
         ax.xaxis.set_major_formatter(xfmt)
         fig.autofmt_xdate()
         plt.xlabel('Datum/Uhrzeit')
         plt.grid(True)
 
+#         print raeume, arten
         for raum in raeume:
-            for art in arten:  
+            for art in arten:
+             
                 plt.ylabel(art)
                 daten = d.choose(von, bis, raum, art)
-                list_of_datetimes = map(lambda x: x[0], daten['roh'])
+                aggregat = self.aggregate_data(daten['roh'], basename)
+                list_of_datetimes = map(lambda x: x[0], aggregat)
                 datum = matplotlib.dates.date2num(list_of_datetimes)   
-                inhalt = map(lambda x: x[3], daten['roh'])
-                datum, inhalt = self.aggregate_data(datum, inhalt, von, bis)
+                inhalt = map(lambda x: x[3], aggregat)
+#                 print inhalt
                 if inhalt != []:
                     plt.plot(datum, inhalt, label=raum, marker='.')
         if hd:
             plt.legend(loc='best')
             fig.suptitle(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis), fontsize=8)
-#             plt.figtext(0.5,0.05,(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis)), fontsize=10, ha='center')            
         else:
             plt.legend(loc='upper left')
-        plt.show()
-#         pfad = full_base_path + 'html/diagramme/' + ''.join(raeume) + '_' + ''.join(arten) + '_' + basename + '.png'
         pfad = full_base_path + 'html/diagramme/' + u'Räume' + '_' + ''.join(arten) + '_' + basename + '.png'
 #         print pfad
         fig.savefig(pfad)
@@ -198,7 +248,7 @@ class Graphs:
             size = (7,2)
             if art in ['Licht', 'Feuchtigkeit']:
                 size = (3,2)
-            for details in [False, True]:
+            for details in [True, False]:
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), d.get_distinct_raum(), (art,), '7 Tage', '%Y-%m-%d', groesse=size, hd=details)
@@ -214,7 +264,8 @@ if __name__ == '__main__':
     parser.add_argument('--update', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     parser.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
     args = parser.parse_args()
-    print(args)
+#     print(args)
+    print "Starte. Uhrzeit: " + str(datetime.datetime.now())
 # Basisobjekte
     d = database.Database()
     s = Sensors()
