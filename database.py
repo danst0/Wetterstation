@@ -38,7 +38,7 @@ class Database:
         self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert))
     
     def choose(self, von, bis, raum, art):
-        self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=?', (raum, art))
+        self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=? ORDER BY datum ASC', (raum, art))
         liste = filter(lambda x: x[0]<bis and x[0]>=von, self.cur.fetchall())
 #         pprint(liste)
         if len(liste) != 0:
