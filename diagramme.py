@@ -37,7 +37,12 @@ class Graphs:
             first_point = datetime.datetime.now()
 #             print first_point
             halbe_stunde = int(round((first_point.minute)/60.0*2, 0)/2.0*60)
+            zusatz = 0
+            if halbe_stunde == 60:
+                halbe_stunde = 0
+                zusatz = 1
             first_point = first_point.replace(minute=halbe_stunde, second=0, microsecond=0)
+            first_point = first_point + datetime.timedelta(hours=zusatz)
 #             print first_point
             times = []
             for i in range(48):
@@ -110,6 +115,32 @@ class Graphs:
                 if counter > 0:
                     average = average/float(counter)
                 neue_daten.append((time, daten[0][1], daten[0][2], average))
+        elif dauer.startswith('1 Quartal'):
+            first_point = datetime.datetime.now()
+#             print first_point
+            stunden = int(round((first_point.hour)/24.0/2, 0)*2.0*24)
+            first_point = first_point.replace(hour=stunden, minute=0, second=0, microsecond=0)
+#             print first_point
+            times = []
+            for i in range(60):
+                times.append(first_point - datetime.timedelta(hours=12*i))
+#             pprint(times)
+#             sys.exit()
+            for time in times:
+                counter = 0
+                i = 0
+                average = 0
+                while i < len(daten):
+                    datum = daten[i]
+                    if datum[0] >= time - datetime.timedelta(hours=24) and datum[0] < time + datetime.timedelta(hours=24):
+                        del daten[i]
+                        counter += 1
+                        average += datum[3]
+                    i += 1
+                if counter > 0:
+                    average = average/float(counter)
+                neue_daten.append((time, daten[0][1], daten[0][2], average))
+
         else:
             print dauer
             neue_daten = copy.deepcopy(daten)            
@@ -141,8 +172,31 @@ class Graphs:
         fig.autofmt_xdate()
         plt.xlabel('Datum/Uhrzeit')
         plt.grid(True)
+        loc = matplotlib.dates.AutoDateLocator()
+        print 'loc', basename
+        if basename.startswith('1 Stunde'):
+#             print range(0,5,5)
+            loc = matplotlib.dates.MinuteLocator(byminute=range(0,60,5))
+        elif basename.startswith('24 Stunden'):
+            if groesse == (7,2):
+                loc = matplotlib.dates.HourLocator(interval=2)
+            else:
+                loc = matplotlib.dates.HourLocator(interval=4)
+            
+        elif basename.startswith('24 Stunden'):
+            loc = matplotlib.dates.HourLocator()
+        elif basename.startswith('7 Tage'):
+            loc = matplotlib.dates.DayLocator()
+#         elif basename.startswith('30 Tage'):
+#             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
+#         elif basename.startswith('1 Quartal'):
+#             loc = matplotlib.dates.DayLocator(interval=5)
+#         elif basename.startswith('1 Jahr'):
+#             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
+#         elif basename.startswith('Alles'):
+#             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
 
-
+        ax.xaxis.set_major_locator(loc)
         for raum in raeume:
             for art in arten:
              
@@ -189,6 +243,7 @@ class Graphs:
 
     def generate_graphs(self):
 #         print d.get_distinct_art()
+        nur_datum = '%d.%m.%y'
         print 'Generiere Diagramme'
         for art in self.d.get_distinct_art():
             print art
@@ -198,13 +253,14 @@ class Graphs:
             size = (7,2)
             if art in ['Licht', 'Feuchtigkeit']:
                 size = (3,2)
+            
             for details in [True, False]:
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', '%Y-%m-%d', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', '%Y-%m-%d', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', '%Y-%m-%d', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', '%Y-%m-%d', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), 'Alles', '%Y-%m-%d', groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', nur_datum, groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', nur_datum, groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', nur_datum, groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', nur_datum, groesse=size, hd=details)
+                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), 'Alles', nur_datum, groesse=size, hd=details)
             
         
