@@ -298,9 +298,9 @@ class Graphs:
             for raum in self.d.get_distinct_raum():
                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), raum, art, '1 Stunde', '%H:%M')     
                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, art, '24 Stunden', '%H:%M')
-            size = (7,2)
+            size = (7,3)
             if art in ['Licht', 'Feuchtigkeit']:
-                size = (3,2)
+                size = (3,3)
             
             for details in [True, False]:
                 self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)

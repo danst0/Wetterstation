@@ -23,8 +23,18 @@ h2 {
     width: 774px; /* (250+10)*3 + Border = 774px; */
     margin: 0 auto;
 }
-
-.description_text {
+.one_value,
+.two_values {
+    clear: both;
+    width: 50%;
+    margin: auto;
+}
+.values {
+    width: 50%;
+    float: left;
+}
+.description_text,
+.untertitel {
     font-size:10px;
 	font-style: bold;
     margin-bottom: 0.2em;
@@ -61,7 +71,7 @@ h2 {
 .datenblock {
 /*     border:1px solid red; */
     width: 250px;
-    height: 250px;
+    height: 300px;
 	border: 1px solid #ddd;
 	display: inline-block;
 	text-align:center;
@@ -96,9 +106,9 @@ h2 {
 
 img.diagramm {
 /*     position: relative; */
-    
-    width: 90%;
-    height: auto;
+    height: 70%;    
+    width: auto
+
 /*     height: 80%; */
 }
 
