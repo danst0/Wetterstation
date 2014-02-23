@@ -9,6 +9,11 @@ Zusammenfassung
 Wetterstation für den Raspberry Pi unter Verwendung der folgenden Komponenten:
 ELV xxx
 
+ToDos
+---
+
+* Geräte aufbauen und anschließen
+* Softwareschnittstellen schaffen
 
 Eingesetzte Geräte
 ---
