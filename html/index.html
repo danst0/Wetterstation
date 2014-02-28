@@ -94,9 +94,10 @@ Alle Daten
                 };                
                 $.ajax({
                     type:'get',
-                    url:'http://localhost/cgi/testcgi.py',
+                    url:'http://localhost/cgi/wetter_aktualisieren.py',
                     success:function(data) {
-//                          alert(data);
+                         alert(data);
+//                          location.reload(); 
                     }
                 });
                 $("#daten").load("currentdata.html");

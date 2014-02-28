@@ -7,16 +7,36 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import time, datetime
 import copy
+import pickle
+import wetterstation
 
 class Graphs:
     font = {
         'family' : 'sans-serif',
         'weight' : 'ultralight',
         'size'   : 9}
-    def __init__(self, datenbank, full_base_path):
+        
+
+    
+    def __init__(self, datenbank, full_base_path, erststart):
         self.d = datenbank
         self.full_base_path = full_base_path
-
+        self.last_generation = {}
+        if not erststart:
+            try:
+                self.last_generation = pickle.load(open(wetterstation.full_base_path + 'data.pickle', 'rb'))
+            except:
+                self.last_generation = {}                
+        self.generation_limits = {  'Alles':        96*60*60,
+                                    '1 Jahr':       96*60*60,
+                                    '1 Quartal':    48*60*60,
+                                    '30 Tage':      24*60*60,
+                                    '7 Tage':       6*60*60,
+                                    '24 Stunden':   10*60,
+                                    '1 Stunde':     30}
+        self.diagramm_counter = 0
+    def close(self):
+        pickle.dump(self.last_generation, open(wetterstation.full_base_path + 'data.pickle', 'wb'))
         
     def aggregate_data(self, daten, dauer):
 #         updatefrequenz: 3 min -> 20 Werte pro Stunde
@@ -29,6 +49,7 @@ class Graphs:
 #         Alles -> ?
         if daten == []:
             return []
+#         print daten
         neue_daten = []
 #         print dauer
         if dauer.startswith('1 Stunde'):
@@ -145,7 +166,8 @@ class Graphs:
         elif dauer.startswith('1 Jahr'):
             first_point = datetime.datetime.now()
             tag = int(round((first_point.day)/360.0*60, 0)/60.0*360)
-            first_point = first_point.replace(day=tag, hour=0, minute=0, second=0, microsecond=0)
+            ## MUSS GEFIXED werden, Was wenn im Februar auf den 30. eines Monats gerundet wird
+            #first_point = first_point.replace(day=tag, hour=0, minute=0, second=0, microsecond=0)
             times = []
             for i in range(60):
                 times.append(first_point - datetime.timedelta(days=6*i))
@@ -264,6 +286,7 @@ class Graphs:
 #         print pfad
         fig.savefig(pfad)
         plt.close()
+        self.diagramm_counter += 1
         
     def base_graph(self, von, bis, raum, art, basename, date_format_string):
         self.font['size'] = 9
@@ -287,28 +310,52 @@ class Graphs:
 #             print 'Speichere: ' + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png'
 #             fig.savefig(self.full_base_path + 'html/diagramme/' + raum + '_' + art + '_' + basename + '.png')
             plt.close()
+            self.diagramm_counter += 1
 
+    def check_time(self, art, hd, rahmen):
+        jetzt = time.time()
+        index = art + str(hd) + rahmen
+#         print index
+        if not index in self.last_generation.keys():
+            self.last_generation[index] = 0
+        if (jetzt - self.last_generation[index]) > self.generation_limits[rahmen]:
+            self.last_generation[index] = jetzt
+#             print 'Führe', index, 'durch'
+            return True
+        else:
+#             print 'Überspringe', index
+            return False
+        
     def generate_graphs(self):
 #         print d.get_distinct_art()
         nur_datum = '%d.%m.%y'
         datum_tag = '%a, %d.'
-        print 'Generiere Diagramme'
+        print 'Generiere Diagramme:',
         for art in self.d.get_distinct_art():
-            print art
-            for raum in self.d.get_distinct_raum():
-                self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), raum, art, '1 Stunde', '%H:%M')     
-                self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, art, '24 Stunden', '%H:%M')
+#             print art
+#             for raum in self.d.get_distinct_raum():
+#                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), raum, art, '1 Stunde', '%H:%M')     
+#                 self.base_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, art, '24 Stunden', '%H:%M')
             size = (7,3)
             if art in ['Licht', 'Feuchtigkeit']:
                 size = (3,3)
             
             for details in [True, False]:
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', datum_tag, groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', nur_datum, groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', nur_datum, groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', nur_datum, groesse=size, hd=details)
-                self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), 'Alles', nur_datum, groesse=size, hd=details)
-            
-        
+                if self.check_time(art, details, '1 Stunde'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
+                if self.check_time(art, details, '24 Stunden'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
+                if self.check_time(art, details, '7 Tage'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', datum_tag, groesse=size, hd=details)
+                if self.check_time(art, details, '30 Tage'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', nur_datum, groesse=size, hd=details)
+                if self.check_time(art, details, '1 Quartal'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', nur_datum, groesse=size, hd=details)
+                if self.check_time(art, details, '1 Jahr'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', nur_datum, groesse=size, hd=details)
+                if self.check_time(art, details, 'Alles'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), 'Alles', nur_datum, groesse=size, hd=details)
+        if self.diagramm_counter != 1:
+            print self.diagramm_counter, 'Diagramme generiert'
+        else:
+            print self.diagramm_counter, 'Diagramm generiert'
