@@ -5,7 +5,7 @@ import subprocess
 
 class Camera:
     camera_ip = '192.168.1.1'
-    local_folder = '/Users/danst/Documents/Archiv/Computer-Elektronik/'
+    local_folder = '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
     remote_folder = '/root/'
     remote_user = 'root'
 
