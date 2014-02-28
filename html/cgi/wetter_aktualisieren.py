@@ -16,7 +16,8 @@ result = ''
 command = ['/usr/local/bin/python2',
 	'/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/wetterstation.py',
 	'--aktualisieren',
-	'--diagramme'] #,
+	'--diagramme'],
+	'--kameraIntervall'] #,
 #	'--erststart']
 try:
 	result = subprocess.check_output(command, stderr=subprocess.STDOUT)

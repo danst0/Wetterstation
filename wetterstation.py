@@ -127,7 +127,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Wetterstation')
     parser.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     parser.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
-    parser.add_argument('--erststart', action='store_true', help='Generiert alle Diagramme neu')
+    parser.add_argument('--erstStart', action='store_true', help='Generiert alle Diagramme neu')
+    parser.add_argument('--kamera', action='store_true', help='Schieße ein neues Bild')
+    parser.add_argument('--kameraIntervall', action='store_true', help='Schieße ein neues Bild, wenn die Zeit gekommen ist')
 
     args = parser.parse_args()
 #     print(args)
