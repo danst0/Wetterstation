@@ -1,23 +1,26 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+import sys
+full_base_path = '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
+sys.path.append(full_base_path)
+
 import time, datetime
 from pprint import pprint
 
 import random
 import argparse
-import sys
 import datenbank
 import diagramme
-import camera_remote
+import cameraremote
 import serial
 from serial.tools.list_ports import *
 
-import cgitb
+
+
+#import cgitb
 # cgitb.enable()
 # import pylab
-
-full_base_path = '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
 
 
 
@@ -81,24 +84,35 @@ class Sensors:
         f = open(full_base_path + 'html/' + filename, 'w')
         current_section = ''
         previous_line =''
+        first_occurence = True
         for line in lines:
 #             print line,
             if previous_line.find('value_text') != -1:
                 if current_section == 'Temperatur':
-                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
+                    if first_occurence:
+                        line = ' ' *12 + str(int(self.daten[u'Raum1'][current_section]))
+                        first_occurence = False
+                    else:
+                        line = ' ' *12 + str(int(self.daten[u'Außen'][current_section]))
                 elif current_section == 'Luftdruck':
-                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
+                    line = ' ' *8 + str(int(self.daten[u'Außen'][current_section]))
                 elif current_section == 'Feuchtigkeit':
-                    line = ' ' *4 + str(int(self.daten['Raum1'][current_section]))
+                    if first_occurence:
+                        line = ' ' *12 + str(int(self.daten['Raum1'][current_section]))
+                        first_occurence = False
+                    else:
+                        line = ' ' *12 + str(int(self.daten[u'Raum2'][current_section]))
                 elif current_section == 'Licht':
-                    line = ' ' *4 + str(int(self.daten[u'Außen'][current_section]))
+                    line = ' ' *8 + str(int(self.daten[u'Außen'][current_section]))
                 line += '\n'
             if line.find('Temperatur') != -1:
                 current_section = 'Temperatur'
+                first_occurence = True
             elif line.find('Luftdruck') != -1:
                 current_section = 'Luftdruck'
             elif line.find('Feuchtigkeit') != -1:  
                 current_section = 'Feuchtigkeit'
+                first_occurence = True
             elif line.find('Helligkeit') != -1:  
                 current_section = 'Licht'
             
@@ -111,8 +125,10 @@ class Sensors:
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Wetterstation')
-    parser.add_argument('--update', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
+    parser.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     parser.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
+    parser.add_argument('--erststart', action='store_true', help='Generiert alle Diagramme neu')
+
     args = parser.parse_args()
 #     print(args)
     print "Starte. Uhrzeit: " + str(datetime.datetime.now())
@@ -120,7 +136,7 @@ if __name__ == '__main__':
     d = datenbank.Database()
     s = Sensors()
 # Update Database?
-    if args.update:
+    if args.aktualisieren:
         d.add_all(s.daten)
 #         d.add('Server', 'Temperatur', random.random()*30)
         d.con.commit()
@@ -128,12 +144,13 @@ if __name__ == '__main__':
         s.write_to_file()
     if args.diagramme:
 # Generate Graphs
-        g = diagramme.Graphs(d, full_base_path)
+        g = diagramme.Graphs(d, full_base_path, args.erststart)
         g.generate_graphs()
-    if not args.update and not args.diagramme:
+        g.close()
+    if not args.aktualisieren and not args.diagramme:
         # Wir wurden ohne Parameter aufgerufen -> CGI Modus
 #         g = diagramme.Graphs()
 #         g.generate_graphs()
-        pass        
+        pass
     print("Beende Wetterstation")
     
