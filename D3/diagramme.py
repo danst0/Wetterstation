@@ -24,7 +24,7 @@ class Graphs:
         self.last_generation = {}
         if not erststart:
             try:
-                self.last_generation = pickle.load(open(wetterstation.full_base_path + 'data.pickle', 'rb'))
+                self.last_generation = pickle.load(open(wetterstation.FULL_BASE_PATH + 'data.pickle', 'rb'))
             except:
                 self.last_generation = {}                
         self.generation_limits = {  'Alles':        96*60*60,
@@ -36,7 +36,7 @@ class Graphs:
                                     '1 Stunde':     30}
         self.diagramm_counter = 0
     def close(self):
-        pickle.dump(self.last_generation, open(wetterstation.full_base_path + 'data.pickle', 'wb'))
+        pickle.dump(self.last_generation, open(wetterstation.FULL_BASE_PATH + 'data.pickle', 'wb'))
         
     def aggregate_data(self, daten, dauer):
 #         updatefrequenz: 3 min -> 20 Werte pro Stunde

@@ -11,12 +11,13 @@ cgitb.enable()
 
 #sys.path.append(dirname(__file__))
 #sys.path.append('/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation')
-
+#print "Content-Type: text/plain;charset=utf-8"
+#print
 result = ''
 command = ['/usr/local/bin/python2',
 	'/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/wetterstation.py',
 	'--aktualisieren',
-	'--diagramme'],
+	'--diagramme',
 	'--kameraIntervall'] #,
 #	'--erststart']
 try:
