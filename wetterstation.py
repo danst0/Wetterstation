@@ -42,7 +42,7 @@ class Sensors:
         if not self.com_port in ports:
             print('Serieller Port nicht gefunden (' + self.com_port + ')')
             print('Vorhandene Ports: ' + ', '.join(ports))
-            #sys.exit(1)
+            sys.exit(1)
         try:
             self.serial = serial.Serial(self.com_port, 115200)
             self.serial.close()
@@ -58,6 +58,7 @@ class Sensors:
 #         pprint(self.daten)
 
     def read_radio(self):
+        print self.serial.readline()
         #string = '$1;1;;;;;;13,0;;;;;;;;58;;;;18,9;39;0,0;2680;0;0'
         string = '$1;1;;;;;;' + self.random_temp_str() + \
                 ';;;;;'+self.random_temp_str() + \
