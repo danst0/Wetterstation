@@ -9,7 +9,7 @@ Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung pe
 """
 import sys
 FULL_BASE_PATH = \
-    '/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/'
+    '/home/danst/Wetterstation/'
 sys.path.append(FULL_BASE_PATH)
 
 import datetime
