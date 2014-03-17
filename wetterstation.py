@@ -37,7 +37,7 @@ class Sensors:
     """
     daten = {'Server': {}, 'Raum1': {}, 'Raum2': {}, u'Außen': {}}
     def __init__(self):
-        self.com_port = '/dev/tty.Bluetooth-Modem'
+        self.com_port = '/dev/ttyUSB0'
         ports = map(lambda x: x[0], comports())
         if not self.com_port in ports:
             print('Serieller Port nicht gefunden (' + self.com_port + ')')
