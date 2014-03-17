@@ -44,8 +44,8 @@ class Sensors:
             print('Vorhandene Ports: ' + ', '.join(ports))
             sys.exit(1)
         try:
-            self.serial = serial.Serial(self.com_port, 115200)
-            self.serial.close()
+            self.serial = serial.Serial(self.com_port, baudrate=9600, timeout=3)
+            
         except:
             print 'Serial: Alles ok, sollte noch gar nicht funktionieren'
 
@@ -56,14 +56,19 @@ class Sensors:
             print('Problem mit I2C-Bus')
             sys.exit(1)
 #         pprint(self.daten)
-
+        self.serial.close()
     def read_radio(self):
-        print self.serial.readline()
+        string = self.serial.readline()
+        if string = None:
+            print 'kein Wert'
+            string = '$1;1;;;;;;' + self.random_temp_str() + \
+                    ';;;;;'+self.random_temp_str() + \
+                    ';;;;;;;'+self.random_temp_str() + \
+                    ';;'+self.random_temp_str()+';;;0'
+
+        else:
+            print string            
         #string = '$1;1;;;;;;13,0;;;;;;;;58;;;;18,9;39;0,0;2680;0;0'
-        string = '$1;1;;;;;;' + self.random_temp_str() + \
-                ';;;;;'+self.random_temp_str() + \
-                ';;;;;;;'+self.random_temp_str() + \
-                ';;'+self.random_temp_str()+';;;0'
 # Check for completeness
         if string[:6] != '$1;1;;' or string[-2:] != ';0':
             return False
@@ -141,7 +146,7 @@ if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     PARSER.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
-    PARSER.add_argument('--erstStart', action='store_true', help='Generiert alle Diagramme neu')
+    PARSER.add_argument('--Erststart', action='store_true', help='Generiert alle Diagramme neu')
     PARSER.add_argument('--kamera', action='store_true', help='Schieße ein neues Bild')
     PARSER.add_argument('--kameraIntervall', action='store_true', help='Schieße ein neues Bild, wenn die Zeit gekommen ist')
 
