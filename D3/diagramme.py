@@ -283,7 +283,7 @@ class Graphs:
         else:
             plt.legend(loc='upper left')
         pfad = self.full_base_path + 'html/diagramme/' + u'Räume' + '_' + ''.join(arten) + '_' + basename + '.png'
-#         print pfad
+        print pfad
         fig.savefig(pfad)
         plt.close()
         self.diagramm_counter += 1

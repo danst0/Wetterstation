@@ -42,7 +42,7 @@ class Sensors:
         if not self.com_port in ports:
             print('Serieller Port nicht gefunden (' + self.com_port + ')')
             print('Vorhandene Ports: ' + ', '.join(ports))
-            sys.exit(1)
+            #sys.exit(1)
         try:
             self.serial = serial.Serial(self.com_port, 115200)
             self.serial.close()
