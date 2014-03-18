@@ -14,8 +14,8 @@ cgitb.enable()
 #print "Content-Type: text/plain;charset=utf-8"
 #print
 result = ''
-command = ['/usr/local/bin/python2',
-	'/Users/danst/Documents/Archiv/Computer-Elektronik/Wetterstation/wetterstation.py',
+command = ['/usr/bin/env', 'python2',
+	'/home/danst/Wetterstation/wetterstation.py',
 	'--aktualisieren',
 	'--diagramme',
 	'--kameraIntervall'] #,

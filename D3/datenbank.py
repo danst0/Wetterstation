@@ -5,11 +5,11 @@ import sqlite3
 import time, datetime
 from pprint import pprint
 import random
-
+import config
 
 
 class Database:
-    file = 'wetter.sqlite3'
+    file = config.FULL_BASE_PATH + 'wetter.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
 #         self.con.text_factory = str
