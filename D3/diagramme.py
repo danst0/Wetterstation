@@ -8,7 +8,7 @@ import matplotlib.dates as md
 import time, datetime
 import copy
 import pickle
-import wetterstation
+import D3.config
 
 class Graphs:
     font = {
@@ -24,7 +24,7 @@ class Graphs:
         self.last_generation = {}
         if not erststart:
             try:
-                self.last_generation = pickle.load(open(wetterstation.FULL_BASE_PATH + 'data.pickle', 'rb'))
+                self.last_generation = pickle.load(open(D3.config.FULL_BASE_PATH + 'data.pickle', 'rb'))
             except:
                 self.last_generation = {}                
         self.generation_limits = {  'Alles':        96*60*60,
@@ -32,11 +32,11 @@ class Graphs:
                                     '1 Quartal':    48*60*60,
                                     '30 Tage':      24*60*60,
                                     '7 Tage':       6*60*60,
-                                    '24 Stunden':   10*60,
-                                    '1 Stunde':     30}
+                                    '24 Stunden':   20*60,
+                                    '1 Stunde':     60}
         self.diagramm_counter = 0
     def close(self):
-        pickle.dump(self.last_generation, open(wetterstation.FULL_BASE_PATH + 'data.pickle', 'wb'))
+        pickle.dump(self.last_generation, open(D3.config.FULL_BASE_PATH + 'data.pickle', 'wb'))
         
     def aggregate_data(self, daten, dauer):
 #         updatefrequenz: 3 min -> 20 Werte pro Stunde
