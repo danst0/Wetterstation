@@ -282,7 +282,7 @@ class Graphs:
             fig.suptitle(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis), fontsize=8)
         else:
             plt.legend(loc='upper left')
-        pfad = self.full_base_path + 'html/diagramme/' + u'Räume' + '_' + ''.join(arten) + '_' + basename + '.png'
+        pfad = self.full_base_path + 'html/diagramme/' + u'Raeume' + '_' + ''.join(arten) + '_' + basename + '.png'
         print pfad
         fig.savefig(pfad)
         plt.close()

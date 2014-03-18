@@ -24,40 +24,40 @@ Alle Daten
 <script type="text/javascript">
         var linkData = [
             [
-                'diagramme/Räume_Temperatur_1 Stunde',
-                'diagramme/Räume_Temperatur_24 Stunden',
-                'diagramme/Räume_Temperatur_7 Tage',
-                'diagramme/Räume_Temperatur_30 Tage',
-                'diagramme/Räume_Temperatur_1 Quartal',
-                'diagramme/Räume_Temperatur_1 Jahr',
-                'diagramme/Räume_Temperatur_Alles'
+                'diagramme/Raeume_Temperatur_1 Stunde',
+                'diagramme/Raeume_Temperatur_24 Stunden',
+                'diagramme/Raeume_Temperatur_7 Tage',
+                'diagramme/Raeume_Temperatur_30 Tage',
+                'diagramme/Raeume_Temperatur_1 Quartal',
+                'diagramme/Raeume_Temperatur_1 Jahr',
+                'diagramme/Raeume_Temperatur_Alles'
             ],
             [
-                'diagramme/Räume_Feuchtigkeit_1 Stunde',
-                'diagramme/Räume_Feuchtigkeit_24 Stunden',
-                'diagramme/Räume_Feuchtigkeit_7 Tage',
-                'diagramme/Räume_Feuchtigkeit_30 Tage',
-                'diagramme/Räume_Feuchtigkeit_1 Quartal',
-                'diagramme/Räume_Feuchtigkeit_1 Jahr',
-                'diagramme/Räume_Feuchtigkeit_Alles'
+                'diagramme/Raeume_Feuchtigkeit_1 Stunde',
+                'diagramme/Raeume_Feuchtigkeit_24 Stunden',
+                'diagramme/Raeume_Feuchtigkeit_7 Tage',
+                'diagramme/Raeume_Feuchtigkeit_30 Tage',
+                'diagramme/Raeume_Feuchtigkeit_1 Quartal',
+                'diagramme/Raeume_Feuchtigkeit_1 Jahr',
+                'diagramme/Raeume_Feuchtigkeit_Alles'
             ],
             [
-                'diagramme/Räume_Luftdruck_1 Stunde',
-                'diagramme/Räume_Luftdruck_24 Stunden',
-                'diagramme/Räume_Luftdruck_7 Tage',
-                'diagramme/Räume_Luftdruck_30 Tage',
-                'diagramme/Räume_Luftdruck_1 Quartal',
-                'diagramme/Räume_Luftdruck_1 Jahr',
-                'diagramme/Räume_Luftdruck_Alles'
+                'diagramme/Raeume_Luftdruck_1 Stunde',
+                'diagramme/Raeume_Luftdruck_24 Stunden',
+                'diagramme/Raeume_Luftdruck_7 Tage',
+                'diagramme/Raeume_Luftdruck_30 Tage',
+                'diagramme/Raeume_Luftdruck_1 Quartal',
+                'diagramme/Raeume_Luftdruck_1 Jahr',
+                'diagramme/Raeume_Luftdruck_Alles'
             ],
             [
-                'diagramme/Räume_Licht_1 Stunde',
-                'diagramme/Räume_Licht_24 Stunden',
-                'diagramme/Räume_Licht_7 Tage',
-                'diagramme/Räume_Licht_30 Tage',
-                'diagramme/Räume_Licht_1 Quartal',
-                'diagramme/Räume_Licht_1 Jahr',
-                'diagramme/Räume_Licht_Alles'
+                'diagramme/Raeume_Licht_1 Stunde',
+                'diagramme/Raeume_Licht_24 Stunden',
+                'diagramme/Raeume_Licht_7 Tage',
+                'diagramme/Raeume_Licht_30 Tage',
+                'diagramme/Raeume_Licht_1 Quartal',
+                'diagramme/Raeume_Licht_1 Jahr',
+                'diagramme/Raeume_Licht_Alles'
             ]]
             // preload the pics
             
@@ -76,7 +76,7 @@ Alle Daten
             function show(name, val) {
                 document.getElementById('picture'+name).src = picO[name-1][val-1].src;
 //                 alert(picO[name-1][val-1].src);
-//                 ,"javascript:window.open('diagramme/Räume_Temperatur_1 Stunde_hd.png','_blank','toolbar=no,menubar=no,resizable=yes,scrollbars=yes')"],
+//                 ,"javascript:window.open('diagramme/Raeume_Temperatur_1 Stunde_hd.png','_blank','toolbar=no,menubar=no,resizable=yes,scrollbars=yes')"],
                 document.getElementById('caption'+name).href=
                 "javascript:window.open('" + picO[name-1][val-1].src.substring(0, picO[name-1][val-1].src.length-4) + "_hd.png" + "','_blank','toolbar=no,menubar=no,resizable=yes,scrollbars=yes');";
                 localStorage["pic_no_"+name] = val;
@@ -96,7 +96,7 @@ Alle Daten
                     type:'get',
                     url:'http://localhost/cgi/wetter_aktualisieren.py',
                     success:function(data) {
-//                          alert(data);
+                         alert(data);
 //                          location.reload(); 
                     }
                 });
