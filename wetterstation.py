@@ -21,6 +21,9 @@ import D3.diagramme
 import D3.cameraremote
 import D3.config
 
+from D3.Adafruit_BMP085 import BMP085
+
+
 # from D3.wde1 import WDE1
 
 import pickle
@@ -41,7 +44,7 @@ class Sensors:
 
         
     def read_radio(self):
-        print 'Funksensor auslesen.'
+        print 'Funksensor auslesen'
         try:
             fields = pickle.load(open(D3.config.FULL_BASE_PATH + 'wde.pickle', 'rb'))
         except:
@@ -59,8 +62,44 @@ class Sensors:
         return True
 
     def read_i2c(self):
-        self.daten['Server']['Temperatur'] = self.random_temp()
-        self.daten['Server']['Luftdruck'] = self.random_temp()
+        print 'Lokalen I2C-Sensor auslesen'
+        # Interner Sensor
+        bmp = BMP085(0x77)
+
+        # To specify a different operating mode, uncomment one of the following:
+        # bmp = BMP085(0x77, 0)  # ULTRALOWPOWER Mode
+        # bmp = BMP085(0x77, 1)  # STANDARD Mode
+        # bmp = BMP085(0x77, 2)  # HIRES Mode
+        bmp = BMP085(0x77, 3)  # ULTRAHIRES Mode
+        temp = 0
+        for i in range(3):
+            temp += bmp.readTemperature()
+        temp = temp/3.0
+
+        # Read the current barometric pressure level
+        druck = 0
+        for i in range(3):
+            druck += bmp.readPressure()
+        druck = druck/3.0
+
+        # To calculate altitude based on an estimated mean sea level pressure
+        # (1013.25 hPa) call the function as follows, but this won't be very accurate
+        # altitude = bmp.readAltitude()
+
+        # To specify a more accurate altitude, enter the correct mean sea level
+        # pressure level.  For example, if the current pressure level is 1023.50 hPa
+        # enter 102350 since we include two decimal places in the integer value
+        # altitude = bmp.readAltitude(102350)
+
+#         print "Temperature: %.2f C" % temp
+#         print "Pressure:    %.2f hPa" % (pressure / 100.0)
+#         print temp
+#         print pressure / 100.0
+
+    #     print "Altitude:    %.2f" % altitude
+    
+        self.daten['Server']['Temperatur'] = temp
+        self.daten['Server']['Luftdruck'] = druck / 100.0
         self.daten[u'Außen']['Temperatur'] = self.random_temp()
         self.daten[u'Außen']['Luftdruck'] = self.random_temp()
         self.daten[u'Außen']['Licht'] = self.random_temp()

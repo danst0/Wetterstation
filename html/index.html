@@ -92,14 +92,15 @@ Alle Daten
 //                     document.getElementById("select2").selectedIndex = 2;
                     show(i, pic_no);
                 };                
-                $.ajax({
-                    type:'get',
-                    url:'/cgi/wetter_aktualisieren.py',
-                    success:function(data) {
-                         alert(data);
-//                          location.reload(); 
-                    }
-                });
+//              sollte eigentlich zum button
+//                 $.ajax({
+//                     type:'get',
+//                     url:'/cgi/wetter_aktualisieren.py',
+//                     success:function(data) {
+//                          alert(data);
+// //                          location.reload(); 
+//                     }
+//                 });
                 $("#daten").load("currentdata.html");
             };
             // Hierdurch wird die window.onload funktion aufgerufen, dadurch werden die datenaktualisiert (Hier klappt der abruf des CGI Skripts nicht)            

@@ -19,7 +19,7 @@ class Database:
 
             
     def generate_tables(self):
-        self.cur.execute('CREATE TABLE weather(datum timestamp, raum text, art text, wert real)')
+        self.cur.execute('CREATE TABLE weather(datum timestamp, ort text, raum text, art text, wert real)')
 
     def check_database(self):
         try:
@@ -35,16 +35,16 @@ class Database:
     def add(self, raum, art, wert):
         now = datetime.datetime.now()
 #         print 'INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert)
-        self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert))
+        self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?, ?)', (now, config.ORT, raum, art, wert))
     
-    def choose(self, von, bis, raum, art):
-        self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=? ORDER BY datum ASC', (raum, art))
+    def choose(self, von, bis, raum, art, ort=config.ORT):
+        self.cur.execute('SELECT * FROM weather WHERE ort=? AND raum=? AND art=? ORDER BY datum ASC', (ort, raum, art))
         liste = filter(lambda x: x[0]<bis and x[0]>=von, self.cur.fetchall())
 #         pprint(liste)
         if len(liste) != 0:
-            maximum_wert = max(map(lambda x: x[3], liste))
-            minimum_wert = min(map(lambda x: x[3], liste))
-            durchschnitt_wert = sum(map(lambda x: x[3], liste))/len(liste)
+            maximum_wert = max(map(lambda x: x[4], liste))
+            minimum_wert = min(map(lambda x: x[4], liste))
+            durchschnitt_wert = sum(map(lambda x: x[4], liste))/len(liste)
         else:
             maximum_wert = None
             minimum_wert = None

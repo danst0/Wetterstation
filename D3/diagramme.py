@@ -9,6 +9,7 @@ import time, datetime
 import copy
 import pickle
 import D3.config
+from pprint import pprint
 
 class Graphs:
     font = {
@@ -79,11 +80,12 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+#                 pprint(daten)
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('7 Tage'):
             first_point = datetime.datetime.now()
             drei_stunden = int(round((first_point.hour)/24.0*8, 0)/8.0*24)
@@ -105,11 +107,11 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=1.5) and datum[0] < time + datetime.timedelta(hours=1.5):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('30 Tage'):
             first_point = datetime.datetime.now()
 #             print first_point
@@ -132,11 +134,11 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=6) and datum[0] < time + datetime.timedelta(hours=6):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('1 Quartal'):
             first_point = datetime.datetime.now()
 #             print first_point
@@ -157,11 +159,11 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=24) and datum[0] < time + datetime.timedelta(hours=24):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
 
         elif dauer.startswith('1 Jahr'):
             first_point = datetime.datetime.now()
@@ -180,11 +182,11 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(days=3) and datum[0] < time + datetime.timedelta(days=3):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('Alles'):
             first_point = datetime.datetime.now()
             first_point = first_point.replace(month=first_point.month, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -203,11 +205,11 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(days=15) and datum[0] < time + datetime.timedelta(days=15):
                         del daten[i]
                         counter += 1
-                        average += datum[3]
+                        average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], average))
+                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
 
 
         else:
@@ -271,10 +273,12 @@ class Graphs:
              
                 plt.ylabel(art)
                 daten = self.d.choose(von, bis, raum, art)
+#                 pprint(daten)
                 aggregat = self.aggregate_data(daten['roh'], basename)
                 list_of_datetimes = map(lambda x: x[0], aggregat)
                 datum = matplotlib.dates.date2num(list_of_datetimes)   
-                inhalt = map(lambda x: x[3], aggregat)
+#                 pprint(aggregat)
+                inhalt = map(lambda x: x[4], aggregat)
                 if inhalt != []:
                     plt.plot(datum, inhalt, label=raum, marker='.')
         if hd:
@@ -297,7 +301,7 @@ class Graphs:
             list_of_datetimes = map(lambda x: x[0], daten['roh'])
             datum = matplotlib.dates.date2num(list_of_datetimes)
         
-            inhalt = map(lambda x: x[3], daten['roh'])
+            inhalt = map(lambda x: x[4], daten['roh'])
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -330,7 +334,7 @@ class Graphs:
 #         print d.get_distinct_art()
         nur_datum = '%d.%m.%y'
         datum_tag = '%a, %d.'
-        print 'Generiere Diagramme:',
+        print 'Generiere Diagramme'
         for art in self.d.get_distinct_art():
 #             print art
 #             for raum in self.d.get_distinct_raum():

@@ -5,3 +5,5 @@ import sys
 FULL_BASE_PATH = \
     '/home/danst/Wetterstation/'
 sys.path.append(FULL_BASE_PATH)
+
+ORT = 'DD AWP47'
