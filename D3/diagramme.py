@@ -266,12 +266,12 @@ class Graphs:
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
 #         elif basename.startswith('Alles'):
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
-
+        einheit = {u'Temperatur': u'°C', u'Luftdruck': 
+'hPa', u'Feuchtigkeit': '%', u'Licht': 'lux'}
         ax.xaxis.set_major_locator(loc)
         for raum in raeume:
             for art in arten:
-             
-                plt.ylabel(art)
+                plt.ylabel(art + ' ' + einheit[art])
                 daten = self.d.choose(von, bis, raum, art)
 #                 pprint(daten)
                 aggregat = self.aggregate_data(daten['roh'], basename)

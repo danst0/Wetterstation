@@ -8,8 +8,8 @@ Aktuell können nur vordefinierte Sensoren (I2C und ELV USB-WDE1) ausgelesen wer
 Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung per Web-Schnittstelle.
 """
 import sys
-
-
+import os
+import __main__
 import datetime
 from pprint import pprint
 
@@ -22,7 +22,7 @@ import D3.cameraremote
 import D3.config
 
 from D3.Adafruit_BMP085 import BMP085
-
+from tendo import singleton
 
 # from D3.wde1 import WDE1
 
@@ -64,23 +64,23 @@ class Sensors:
     def read_i2c(self):
         print 'Lokalen I2C-Sensor auslesen'
         # Interner Sensor
-        bmp = BMP085(0x77)
+#         bmp = BMP085(0x77, bus=1)
 
         # To specify a different operating mode, uncomment one of the following:
         # bmp = BMP085(0x77, 0)  # ULTRALOWPOWER Mode
         # bmp = BMP085(0x77, 1)  # STANDARD Mode
         # bmp = BMP085(0x77, 2)  # HIRES Mode
-        bmp = BMP085(0x77, 3)  # ULTRAHIRES Mode
-        temp = 0
+        server_bmp = BMP085(0x77, 3, bus=1)  # ULTRAHIRES Mode
+        server_temp = 0
         for i in range(3):
-            temp += bmp.readTemperature()
-        temp = temp/3.0
+            server_temp += server_bmp.readTemperature()
+        server_temp = server_temp/3.0
 
         # Read the current barometric pressure level
-        druck = 0
+        server_druck = 0
         for i in range(3):
-            druck += bmp.readPressure()
-        druck = druck/3.0
+            server_druck += server_bmp.readPressure()
+        server_druck = server_druck/3.0
 
         # To calculate altitude based on an estimated mean sea level pressure
         # (1013.25 hPa) call the function as follows, but this won't be very accurate
@@ -91,18 +91,36 @@ class Sensors:
         # enter 102350 since we include two decimal places in the integer value
         # altitude = bmp.readAltitude(102350)
 
+#         print "Temperature: %.2f C" % server_temp
+#         print "Pressure:    %.2f hPa" % (server_druck / 100.0)
+#         print server_temp
+#         print server_druck / 100.0
+
+        aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
+        aussen_temp = 0
+        for i in range(3):
+            aussen_temp += aussen_bmp.readTemperature()
+        aussen_temp = aussen_temp/3.0
+
+        # Read the current barometric pressure level
+        aussen_druck = 0
+        for i in range(3):
+            aussen_druck += aussen_bmp.readPressure()
+        aussen_druck = aussen_druck/3.0
+
 #         print "Temperature: %.2f C" % temp
-#         print "Pressure:    %.2f hPa" % (pressure / 100.0)
+#         print "Pressure:    %.2f hPa" % (druck / 100.0)
 #         print temp
-#         print pressure / 100.0
+#         print druck / 100.0
+
 
     #     print "Altitude:    %.2f" % altitude
     
-        self.daten['Server']['Temperatur'] = temp
-        self.daten['Server']['Luftdruck'] = druck / 100.0
-        self.daten[u'Außen']['Temperatur'] = self.random_temp()
-        self.daten[u'Außen']['Luftdruck'] = self.random_temp()
-        self.daten[u'Außen']['Licht'] = self.random_temp()
+        self.daten['Server']['Temperatur'] = server_temp
+        self.daten['Server']['Luftdruck'] = server_druck / 100.0
+        self.daten[u'Außen']['Temperatur'] = aussen_temp
+        self.daten[u'Außen']['Luftdruck'] = aussen_druck/100.0
+        self.daten[u'Außen']['Licht'] = 10.0
         return True
 
     def random_temp_str(self):
@@ -156,8 +174,19 @@ class Sensors:
             file_handle.write(line)
         file_handle.close()
 
-if __name__ == '__main__':
+def isOnlyInstance():
+    # Determine if there are more than the current instance of the application
+    # running at the current time.
+    return os.system("(( $(ps -ef | grep python | grep '[" +
+                     __main__.__file__[0] + "]" + __main__.__file__[1:] +
+                     "' | wc -l) > 1 ))") != 0
 
+if __name__ == '__main__':
+    
+    if not isOnlyInstance():
+        print 'Es kann nur eine Instanz der Wetterstation laufen.'
+        sys.exit()
+    
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     PARSER.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')

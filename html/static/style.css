@@ -27,7 +27,7 @@ img.cam {
 }
 img.diagramm {
 /*     position: relative; */
-    height: 75%;    
+    height: 72%;    
     width: auto;
 
 /*     height: 80%; */
@@ -49,8 +49,13 @@ img.diagramm {
     width: 50%;
     float: left;
 }
-.description_text,
 .untertitel {
+    font-size:10px;
+	font-style: bold;
+    margin-top: 0.2em;
+    margin-bottom: 1em;
+}
+.description_text {
     font-size:10px;
 	font-style: bold;
     margin-bottom: 0.2em;
