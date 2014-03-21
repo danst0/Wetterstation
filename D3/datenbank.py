@@ -34,21 +34,26 @@ class Database:
                 self.add(first_key, sec_key, list[first_key][sec_key])
     def add(self, raum, art, wert):
         now = datetime.datetime.now()
+        if wert == 0:
+            print 'zero value'        
+            print 'now adding', (now, config.ORT, raum, art, wert)
 #         print 'INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert)
         self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?, ?)', (now, config.ORT, raum, art, wert))
     
     def choose(self, von, bis, raum, art, ort=config.ORT):
         self.cur.execute('SELECT * FROM weather WHERE ort=? AND raum=? AND art=? ORDER BY datum ASC', (ort, raum, art))
         liste = filter(lambda x: x[0]<bis and x[0]>=von, self.cur.fetchall())
+        # Alle None-Werte aus den Daten entfernen
+        liste = filter(lambda x: x[4] != None, liste)
 #         pprint(liste)
-        if len(liste) != 0:
-            maximum_wert = max(map(lambda x: x[4], liste))
-            minimum_wert = min(map(lambda x: x[4], liste))
-            durchschnitt_wert = sum(map(lambda x: x[4], liste))/len(liste)
-        else:
-            maximum_wert = None
-            minimum_wert = None
-            durchschnitt_wert = None
+#         if len(liste) != 0:
+#             maximum_wert = max(map(lambda x: x[4], liste))
+#             minimum_wert = min(map(lambda x: x[4], liste))
+#             durchschnitt_wert = sum(map(lambda x: x[4], liste))/len(liste)
+#         else:
+        maximum_wert = None
+        minimum_wert = None
+        durchschnitt_wert = None
         return {'roh': liste, 'min': minimum_wert, 'max': maximum_wert, 'durchschnitt': durchschnitt_wert}
 
     def get_distinct_raum(self):
@@ -57,7 +62,9 @@ class Database:
 
     def get_distinct_art(self):
         self.cur.execute('SELECT DISTINCT art FROM weather')
-        return map(lambda x: x[0], self.cur.fetchall())
+        tmp = self.cur.fetchall()
+#         print tmp
+        return map(lambda x: x[0], tmp)
 
     
     def get_latest(self, raum, art):

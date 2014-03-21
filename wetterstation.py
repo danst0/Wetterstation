@@ -9,7 +9,7 @@ Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung pe
 """
 import sys
 import os
-import __main__
+# import __main__
 import datetime
 from pprint import pprint
 
@@ -22,10 +22,7 @@ import D3.cameraremote
 import D3.config
 
 from D3.Adafruit_BMP085 import BMP085
-from tendo import singleton
-
-# from D3.wde1 import WDE1
-
+from D3.TSL2561 import TSL2561
 import pickle
 
 class Sensors:
@@ -34,7 +31,9 @@ class Sensors:
     """
     daten = {'Server': {}, 'Raum1': {}, 'Raum2': {}, u'Außen': {}}
     def __init__(self):
-
+        pass
+    
+    def sensoren_auslesen(self):
         if not self.read_radio():
             print('Problem mit dem Empfänger')
             sys.exit(1)
@@ -55,10 +54,10 @@ class Sensors:
 #         fields = string.split(';')
 #         print len(fields)
 #         pprint(fields)
-        self.daten['Raum1']['Temperatur'] = float(fields[4].replace(',', '.'))
-        self.daten['Raum1']['Feuchtigkeit'] = float(fields[12].replace(',', '.'))
-        self.daten['Raum2']['Temperatur'] = 0 #float(fields[19].replace(',', '.'))
-        self.daten['Raum2']['Feuchtigkeit'] = 0 #float(fields[21].replace(',', '.'))
+        self.daten['Raum1']['Temperatur'] = fields[1]
+        self.daten['Raum1']['Feuchtigkeit'] = fields[9]
+        self.daten['Raum2']['Temperatur'] = None #float(fields[19].replace(',', '.'))
+        self.daten['Raum2']['Feuchtigkeit'] = None #float(fields[21].replace(',', '.'))
         return True
 
     def read_i2c(self):
@@ -115,12 +114,22 @@ class Sensors:
 
 
     #     print "Altitude:    %.2f" % altitude
+        tsl = TSL2561()
+        licht = 0
+        for i in range(3):
+            licht += tsl.readLux()
+        licht = licht / 3.0
+#         print licht
+        if licht == 0:
+            print 'Licht war null!'
+#         licht += 1
+    
     
         self.daten['Server']['Temperatur'] = server_temp
         self.daten['Server']['Luftdruck'] = server_druck / 100.0
         self.daten[u'Außen']['Temperatur'] = aussen_temp
         self.daten[u'Außen']['Luftdruck'] = aussen_druck/100.0
-        self.daten[u'Außen']['Licht'] = 10.0
+        self.daten[u'Außen']['Licht'] = licht
         return True
 
     def random_temp_str(self):
@@ -174,18 +183,18 @@ class Sensors:
             file_handle.write(line)
         file_handle.close()
 
-def isOnlyInstance():
-    # Determine if there are more than the current instance of the application
-    # running at the current time.
-    return os.system("(( $(ps -ef | grep python | grep '[" +
-                     __main__.__file__[0] + "]" + __main__.__file__[1:] +
-                     "' | wc -l) > 1 ))") != 0
+# def isOnlyInstance():
+#     # Determine if there are more than the current instance of the application
+#     # running at the current time.
+#     return os.system("(( $(ps -ef | grep python | grep '[" +
+#                      __main__.__file__[0] + "]" + __main__.__file__[1:] +
+#                      "' | wc -l) > 1 ))") != 0
 
 if __name__ == '__main__':
     
-    if not isOnlyInstance():
-        print 'Es kann nur eine Instanz der Wetterstation laufen.'
-        sys.exit()
+#     if not isOnlyInstance():
+#         print 'Es kann nur eine Instanz der Wetterstation laufen.'
+#         sys.exit()
     
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
@@ -196,12 +205,13 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 #     print(args)
-    print "Starte. Uhrzeit: " + str(datetime.datetime.now())
+    print "Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y')
 # Basisobjekte
     D = D3.datenbank.Database()
     S = Sensors()
 # Update Database?
     if ARGS.aktualisieren:
+        S.sensoren_auslesen()
         D.add_all(S.daten)
 #         d.add('Server', 'Temperatur', random.random()*30)
         D.con.commit()
@@ -212,10 +222,5 @@ if __name__ == '__main__':
         G = D3.diagramme.Graphs(D, D3.config.FULL_BASE_PATH, ARGS.erststart)
         G.generate_graphs()
         G.close()
-    if not ARGS.aktualisieren and not ARGS.diagramme:
-        # Wir wurden ohne Parameter aufgerufen -> CGI Modus
-#         g = diagramme.Graphs()
-#         g.generate_graphs()
-        pass
-    print("Beende Wetterstation")
+#     print("Beende Wetterstation")
 

@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
+from matplotlib.ticker import ScalarFormatter
 import time, datetime
 import copy
 import pickle
@@ -77,6 +78,7 @@ class Graphs:
                 average = 0
                 while i < len(daten):
                     datum = daten[i]
+#                     print datum
                     if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
                         del daten[i]
                         counter += 1
@@ -266,8 +268,7 @@ class Graphs:
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
 #         elif basename.startswith('Alles'):
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
-        einheit = {u'Temperatur': u'°C', u'Luftdruck': 
-'hPa', u'Feuchtigkeit': '%', u'Licht': 'lux'}
+        einheit = {u'Temperatur': u'°C', u'Luftdruck': 'hPa', u'Feuchtigkeit': '%', u'Licht': 'lx'}
         ax.xaxis.set_major_locator(loc)
         for raum in raeume:
             for art in arten:
@@ -279,11 +280,16 @@ class Graphs:
                 datum = matplotlib.dates.date2num(list_of_datetimes)   
 #                 pprint(aggregat)
                 inhalt = map(lambda x: x[4], aggregat)
-                if inhalt != []:
+                if art == 'Licht':
+                    ax.set_yscale('log')
+                    ax.yaxis.set_major_formatter(ScalarFormatter())
+                    inhalt = map(lambda x: x+1, inhalt)
+#                 inhalt = map(lambda x: None if x==0 else x, inhalt)
+		if inhalt != []:
                     plt.plot(datum, inhalt, label=raum, marker='.')
         if hd:
             plt.legend(loc='best')
-            fig.suptitle(u'Verlauf zwischen ' + str(von) + ' und ' + str(bis), fontsize=8)
+            fig.suptitle(u'Verlauf zwischen ' + von.strftime('%d.%m.%Y %H:%M') + ' und ' + bis.strftime('%d.%m.%Y %H:%M'), fontsize=8)
         else:
             plt.legend(loc='upper left')
         pfad = self.full_base_path + 'html/diagramme/' + u'Raeume' + '_' + ''.join(arten) + '_' + basename + '.png'
@@ -335,6 +341,7 @@ class Graphs:
         nur_datum = '%d.%m.%y'
         datum_tag = '%a, %d.'
         print 'Generiere Diagramme'
+#         print self.d.get_distinct_art()
         for art in self.d.get_distinct_art():
 #             print art
 #             for raum in self.d.get_distinct_raum():
