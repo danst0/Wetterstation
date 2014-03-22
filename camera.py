@@ -23,9 +23,9 @@ class Camera:
 if __name__ == "__main__":
     c = Camera()
     parser = argparse.ArgumentParser(description='Kamera')
-    parser.add_argument('--fullpanorama', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
-    parser.add_argument('--picture', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
-    parser.add_argument('--move', action='store_true', help='Generiert alle Diagramme neu')
+    parser.add_argument('--fullpanorama', action='store_true', help='Aufnahme eines vollständigen Panoramas')
+    parser.add_argument('--picture', action='store_true', help='Schieße ein aktuelles Bild aus der aktuellen Position')
+    parser.add_argument('--move', action='store_true', help='Bewegung der Kamera')
 
     args = parser.parse_args()
     print(args)
