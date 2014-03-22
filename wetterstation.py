@@ -183,8 +183,8 @@ class Sensoren:
                 current_section = 'Licht'
 
             previous_line = line
-#             print line,
-            neue_zeilen += line
+            print line,
+            neue_zeilen = neue_zeilen + line
         print neue_zeilen
         file_handle.write(neue_zeilen)
         file_handle.close()
