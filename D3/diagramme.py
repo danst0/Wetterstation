@@ -11,6 +11,8 @@ import copy
 import pickle
 import D3.config
 from pprint import pprint
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 
 class Graphs:
     font = {
@@ -270,6 +272,7 @@ class Graphs:
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
         einheit = {u'Temperatur': u'°C', u'Luftdruck': 'hPa', u'Feuchtigkeit': '%', u'Licht': 'lx'}
         ax.xaxis.set_major_locator(loc)
+#         gca().tight_layout()
         for raum in raeume:
             for art in arten:
                 plt.ylabel(art + ' ' + einheit[art])
@@ -285,6 +288,7 @@ class Graphs:
                     ax.yaxis.set_major_formatter(ScalarFormatter())
                     inhalt = map(lambda x: x+1, inhalt)
 #                 inhalt = map(lambda x: None if x==0 else x, inhalt)
+
 		if inhalt != []:
                     plt.plot(datum, inhalt, label=raum, marker='.')
         if hd:

@@ -25,7 +25,7 @@ from D3.Adafruit_BMP085 import BMP085
 from D3.TSL2561 import TSL2561
 import pickle
 
-class Sensors:
+class Sensoren:
     """
     Klasse zum Auslesen der Sensoren über I2C und serieller Schnittstelle.
     """
@@ -73,12 +73,14 @@ class Sensors:
         server_temp = 0
         for i in range(3):
             server_temp += server_bmp.readTemperature()
+            time.sleep(1)            
         server_temp = server_temp/3.0
 
         # Read the current barometric pressure level
         server_druck = 0
         for i in range(3):
             server_druck += server_bmp.readPressure()
+            time.sleep(1)            
         server_druck = server_druck/3.0
 
         # To calculate altitude based on an estimated mean sea level pressure
@@ -118,6 +120,7 @@ class Sensors:
         licht = 0
         for i in range(3):
             licht += tsl.readLux()
+            time.sleep(1)
         licht = licht / 3.0
 #         print licht
         if licht == 0:
@@ -208,7 +211,7 @@ if __name__ == '__main__':
     print "Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y')
 # Basisobjekte
     D = D3.datenbank.Database()
-    S = Sensors()
+    S = Sensoren()
 # Update Database?
     if ARGS.aktualisieren:
         S.sensoren_auslesen()
