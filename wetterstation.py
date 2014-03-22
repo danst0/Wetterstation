@@ -150,6 +150,7 @@ class Sensoren:
         current_section = ''
         previous_line = ''
         first_occurence = True
+        neue_zeilen = ''
         for line in lines:
 #             print line,
             if previous_line.find('value_text') != -1:
@@ -183,7 +184,8 @@ class Sensoren:
 
             previous_line = line
 #             print line,
-            file_handle.write(line)
+            neue_zeilen += line
+        file_handle.write(neue_zeilen)
         file_handle.close()
 
 # def isOnlyInstance():
