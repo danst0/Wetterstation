@@ -18,7 +18,7 @@ import random
 import argparse
 import D3.datenbank
 import D3.diagramme
-import D3.cameraremote
+from D3.cameraremote import Camera
 import D3.config
 
 from D3.Adafruit_BMP085 import BMP085
@@ -34,6 +34,8 @@ class Sensoren:
         pass
     
     def sensoren_auslesen(self):
+
+        
         if not self.read_radio():
             print('Problem mit dem Empfänger')
             sys.exit(1)
@@ -41,6 +43,12 @@ class Sensoren:
             print('Problem mit I2C-Bus')
             sys.exit(1)
 
+        print('Aufnahme Kamerabild')
+        c = Camera()
+        if c.take_picture():
+            print('Kamerabild herunterladen')        
+            c.download_picture()
+        
         
     def read_radio(self):
         print 'Funksensor auslesen'
@@ -118,10 +126,14 @@ class Sensoren:
     #     print "Altitude:    %.2f" % altitude
         tsl = TSL2561()
         licht = 0
-        for i in range(3):
-            licht += tsl.readLux()
+        counter = 0
+        for i in range(8):
+            tmp = tsl.readLux()
+            if tmp != 0:
+                licht += tmp
+                counter += 1
             time.sleep(1)
-        licht = licht / 3.0
+        licht = licht / float(counter)
 #         print licht
         if licht == 0:
             print 'Licht war null!'
@@ -133,6 +145,8 @@ class Sensoren:
         self.daten[u'Außen']['Temperatur'] = aussen_temp
         self.daten[u'Außen']['Luftdruck'] = aussen_druck/100.0
         self.daten[u'Außen']['Licht'] = licht
+        
+
         return True
 
     def random_temp_str(self):
