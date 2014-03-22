@@ -151,25 +151,35 @@ class Sensoren:
         previous_line = ''
         first_occurence = True
         neue_zeilen = ''
+        daten_ohne_none = {}
+        for raum in self.daten.keys():
+            if raum not in daten_ohne_none.keys():
+                daten_ohne_none[raum] = {} 
+            for abschnitt in self.daten[raum].keys():
+                if self.daten[raum][abschnitt] == None:
+                    daten_ohne_none[raum][abschnitt] = '--' 
+                else:
+                    daten_ohne_none[raum][abschnitt] = str(int(self.daten[raum][abschnitt]))
+#         pprint(daten_ohne_none)
         for line in lines:
 #             print line,
             if previous_line.find('value_text') != -1:
                 if current_section == 'Temperatur':
                     if first_occurence:
-                        line = ' ' *12 + str(int(self.daten[u'Raum1'][current_section]))
+                        line = ' ' *12 + daten_ohne_none[u'Raum1'][current_section]
                         first_occurence = False
                     else:
-                        line = ' ' *12 + str(int(self.daten[u'Außen'][current_section]))
+                        line = ' ' *12 + daten_ohne_none[u'Außen'][current_section]
                 elif current_section == 'Luftdruck':
-                    line = ' ' *8 + str(int(self.daten[u'Außen'][current_section]))
+                    line = ' ' *8 + daten_ohne_none[u'Außen'][current_section]
                 elif current_section == 'Feuchtigkeit':
                     if first_occurence:
-                        line = ' ' *12 + str(int(self.daten['Raum1'][current_section]))
+                        line = ' ' *12 + daten_ohne_none['Raum1'][current_section]
                         first_occurence = False
                     else:
-                        line = ' ' *12 + str(int(self.daten[u'Raum2'][current_section]))
+                        line = ' ' *12 + daten_ohne_none[u'Raum2'][current_section]
                 elif current_section == 'Licht':
-                    line = ' ' *8 + str(int(self.daten[u'Außen'][current_section]))
+                    line = ' ' *8 + daten_ohne_none[u'Außen'][current_section]
                 line += '\n'
             if line.find('Temperatur') != -1:
                 current_section = 'Temperatur'
@@ -183,10 +193,11 @@ class Sensoren:
                 current_section = 'Licht'
 
             previous_line = line
-            print line,
+#             print line,
             neue_zeilen = neue_zeilen + line
-        print neue_zeilen
-        file_handle.write(neue_zeilen)
+#         print neue_zeilen
+        if neue_zeilen != '':
+            file_handle.write(neue_zeilen)
         file_handle.close()
 
 # def isOnlyInstance():
