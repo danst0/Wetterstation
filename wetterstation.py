@@ -185,6 +185,7 @@ class Sensoren:
             previous_line = line
 #             print line,
             neue_zeilen += line
+        print neue_zeilen
         file_handle.write(neue_zeilen)
         file_handle.close()
 
