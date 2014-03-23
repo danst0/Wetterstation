@@ -17,6 +17,7 @@ class Camera:
         image = local_path + 'webcam.jpg'
         image_pan_temp = local_path + 'webcam_pan.jpg'
         image_pan_select = local_path + 'webcam_pan.jpg'
+        image_pan_orig = local_path + 'webcam_pan_orig.jpg'
         image_pan_final = local_path + 'webcam_panorama.jpg'
         command = [raspistill, '-o', image_raw, '-t', '1']
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
@@ -40,7 +41,10 @@ class Camera:
 #         print output        
 #         convert -crop 100%x50% 0017kh.gif +repage  tiles%d.gif
 #         2592x1944
-        command = [convert, image, '-crop', '2592x1166+0+778', image_pan_temp]
+        size_x = 2592
+        size_y = 1944
+        percentage = 0.60
+        command = [convert, image, '-crop', str(size_x)+'x'+str(int(size_y*percentage))+'+0+'+str(size_y-int(size_y*percentage)), image_pan_temp]
         try:
             output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, e:
@@ -48,12 +52,18 @@ class Camera:
             print e.output
             return False
 #         print output     
+#         try:
+#             os.rename(image_pan_select, image_pan_orig)
+#         except:
+#             print 'Fehler bei der Umbenennung'
+#             return False
+        command = [convert, image_pan_select, '-resize', '30%', image_pan_final]
         try:
-            os.rename(image_pan_select, image_pan_final)
-        except:
-            print 'Fehler bei der Umbenennung'
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError, e:
+            print 'Fehler bei der Konvertierung', e.returncode
+            print e.output
             return False
-
 
         print('Foto erstellt')
         return True
