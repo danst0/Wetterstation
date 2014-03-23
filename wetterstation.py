@@ -69,7 +69,7 @@ class Sensoren:
         return True
 
     def read_i2c(self):
-        print 'Lokalen I2C-Sensor auslesen'
+        print 'Lokale I2C-Sensoren auslesen'
         # Interner Sensor
 #         bmp = BMP085(0x77, bus=1)
 
@@ -106,6 +106,8 @@ class Sensoren:
 #         print server_druck / 100.0
 
         aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
+        print aussen_bmp.check_availability()
+        raw_input()
         aussen_temp = 0
         for i in range(3):
             aussen_temp += aussen_bmp.readTemperature()
@@ -117,24 +119,25 @@ class Sensoren:
             aussen_druck += aussen_bmp.readPressure()
         aussen_druck = aussen_druck/3.0
 
-#         print "Temperature: %.2f C" % temp
-#         print "Pressure:    %.2f hPa" % (druck / 100.0)
+        print "Temperature: %.2f C" % aussen_temp
+        print "Pressure:    %.2f hPa" % (aussen_druck / 100.0)
 #         print temp
 #         print druck / 100.0
 
 
     #     print "Altitude:    %.2f" % altitude
-        tsl = TSL2561()
+        tsl = TSL2561(debug=True)
         licht = 0
         counter = 0
-        for i in range(8):
+        for i in range(5):
             tmp = tsl.readLux()
             if tmp != 0:
                 licht += tmp
                 counter += 1
-            time.sleep(1)
-        licht = licht / float(counter)
-#         print licht
+            time.sleep(2.0)
+        if counter != 0:
+            licht = licht / float(counter)
+        print licht
         if licht == 0:
             print 'Licht war null!'
 #         licht += 1

@@ -109,6 +109,20 @@ Alle Daten
                     $("#daten").load("currentdata.html");
                 });
             });
+            $(document).ready(function() {
+                $("#camera_reload").on("click", function() {
+//                     $.ajax({
+//                         type:'get',
+//                         url:'/cgi/wetter_aktualisieren.py',
+//                         success:function(data) {
+//                              alert(data);
+// //                            location.reload(); 
+//                         }
+//                     });
+                    alert("hallo");
+                });
+            });
+
 </script>            
 
 <title>D3-Wetterstation</title>
