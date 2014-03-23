@@ -47,21 +47,30 @@ class BMP085 :
   _cal_MC = 0
   _cal_MD = 0
 
+  def check_availability(self):
+    result = self.readS16(self.__BMP085_CAL_AC1)
+    print result
+    raw_input()
+    return True
   # Constructor
   def __init__(self, address=0x77, mode=1, bus=-1, debug=False):
     self.i2c = Adafruit_I2C(address, busnum=bus)
 
     self.address = address
     self.debug = debug
-    # Make sure the specified mode is in the appropriate range
-    if ((mode < 0) | (mode > 3)):
-      if (self.debug):
-        print "Invalid Mode: Using STANDARD by default"
-      self.mode = self.__BMP085_STANDARD
+    if self.check_availability():
+        # Make sure the specified mode is in the appropriate range
+        if ((mode < 0) | (mode > 3)):
+          if (self.debug):
+            print "Invalid Mode: Using STANDARD by default"
+          self.mode = self.__BMP085_STANDARD
+        else:
+          self.mode = mode
+        # Read the calibration data
+        self.readCalibrationData()
     else:
-      self.mode = mode
-    # Read the calibration data
-    self.readCalibrationData()
+        i2c = None
+        
 
   def readS16(self, register):
     "Reads a signed 16-bit value"
@@ -107,7 +116,10 @@ class BMP085 :
 
   def readRawTemp(self):
     "Reads the raw (uncompensated) temperature from the sensor"
-    self.i2c.write8(self.__BMP085_CONTROL, self.__BMP085_READTEMPCMD)
+    print 'lese temp'
+    result = self.i2c.write8(self.__BMP085_CONTROL, self.__BMP085_READTEMPCMD)
+    print result
+    raw_input()
     time.sleep(0.005)  # Wait 5ms
     raw = self.readU16(self.__BMP085_TEMPDATA)
     if (self.debug):
