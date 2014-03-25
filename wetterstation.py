@@ -215,7 +215,7 @@ class Sensoren:
                 elif current_section == 'Licht':
                     line = ' ' *8 + special_data[u'Außen'][current_section][special_value]
                 line += '\n'               
-                pdb.set_trace()
+#                 pdb.set_trace()
 
             elif previous_line.find('value_text') != -1:
                 if current_section == 'Temperatur':
