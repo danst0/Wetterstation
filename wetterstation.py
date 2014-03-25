@@ -7,6 +7,7 @@ Auslesen, aggregieren, speichern und auswerten von Wetterdaten.
 Aktuell können nur vordefinierte Sensoren (I2C und ELV USB-WDE1) ausgelesen werden.
 Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung per Web-Schnittstelle.
 """
+import pdb
 import sys
 import os
 # import __main__
@@ -24,6 +25,7 @@ import D3.config
 from D3.Adafruit_BMP085 import BMP085
 from D3.TSL2561 import TSL2561
 import pickle
+
 
 class Sensoren:
     """
@@ -43,11 +45,7 @@ class Sensoren:
             print('Problem mit I2C-Bus')
             sys.exit(1)
 
-        print('Aufnahme Kamerabild')
-        c = Camera()
-        if c.take_picture():
-            print('Kamerabild herunterladen')        
-            c.download_picture()
+
         
         
     def read_radio(self):
@@ -89,7 +87,7 @@ class Sensoren:
         for i in range(3):
             server_druck += server_bmp.readPressure()
             time.sleep(1)            
-        server_druck = server_druck/3.0
+        server_druck = server_druck/3.0/100.0
 
         # To calculate altitude based on an estimated mean sea level pressure
         # (1013.25 hPa) call the function as follows, but this won't be very accurate
@@ -106,47 +104,50 @@ class Sensoren:
 #         print server_druck / 100.0
 
         aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
-        print aussen_bmp.check_availability()
-        raw_input()
-        aussen_temp = 0
-        for i in range(3):
-            aussen_temp += aussen_bmp.readTemperature()
-        aussen_temp = aussen_temp/3.0
+#         print aussen_bmp.available()
+        if aussen_bmp.available():
 
-        # Read the current barometric pressure level
-        aussen_druck = 0
-        for i in range(3):
-            aussen_druck += aussen_bmp.readPressure()
-        aussen_druck = aussen_druck/3.0
+            aussen_temp = 0
+            for i in range(3):
+                aussen_temp += aussen_bmp.readTemperature()
+            aussen_temp = aussen_temp/3.0
 
-        print "Temperature: %.2f C" % aussen_temp
-        print "Pressure:    %.2f hPa" % (aussen_druck / 100.0)
-#         print temp
-#         print druck / 100.0
+            # Read the current barometric pressure level
+            aussen_druck = 0
+            for i in range(3):
+                aussen_druck += aussen_bmp.readPressure()
+            aussen_druck = aussen_druck/3.0/100.0
 
+#             print "Temperature: %.2f C" % aussen_temp
+#             print "Pressure:    %.2f hPa" % (aussen_druck / 100.0)
 
-    #     print "Altitude:    %.2f" % altitude
-        tsl = TSL2561(debug=True)
-        licht = 0
-        counter = 0
-        for i in range(5):
-            tmp = tsl.readLux()
-            if tmp != 0:
-                licht += tmp
-                counter += 1
-            time.sleep(2.0)
-        if counter != 0:
-            licht = licht / float(counter)
-        print licht
-        if licht == 0:
-            print 'Licht war null!'
-#         licht += 1
-    
+            tsl = TSL2561()
+    #         print tsl.available()
+            licht = 0.0
+            counter = 0.0
+            for i in range(5):
+                tmp = tsl.readLux(gain=0) # 0 oder leer für automatisch
+                if tmp != 0:
+                    licht += tmp
+                    counter += 1
+                time.sleep(1.2)
+            if counter != 0:
+                licht = licht / float(counter)
+#             print licht
+            if licht == 0:
+                print 'Licht war null!'
+    #         licht += 1
+
+        else:
+            aussen_temp = None
+            aussen_druck = None
+            licht = None   
+
     
         self.daten['Server']['Temperatur'] = server_temp
-        self.daten['Server']['Luftdruck'] = server_druck / 100.0
+#         self.daten['Server']['Luftdruck'] = server_druck
         self.daten[u'Außen']['Temperatur'] = aussen_temp
-        self.daten[u'Außen']['Luftdruck'] = aussen_druck/100.0
+        self.daten[u'Außen']['Luftdruck'] = (aussen_druck + server_druck) / 2.0
         self.daten[u'Außen']['Licht'] = licht
         
 
@@ -158,7 +159,7 @@ class Sensoren:
     def random_temp(self):
         return ((random.random()-0.2/0.5)*0.5)*100
 
-    def write_to_file(self):
+    def write_to_file(self, datenbank):
         filename = 'currentdata.html'
         file_handle = open(D3.config.FULL_BASE_PATH + 'html/' + filename, 'r')
         lines = file_handle.readlines()
@@ -169,18 +170,54 @@ class Sensoren:
         first_occurence = True
         neue_zeilen = ''
         daten_ohne_none = {}
+        special_data = {}
         for raum in self.daten.keys():
             if raum not in daten_ohne_none.keys():
                 daten_ohne_none[raum] = {} 
+                special_data[raum] = {}
             for abschnitt in self.daten[raum].keys():
                 if self.daten[raum][abschnitt] == None:
                     daten_ohne_none[raum][abschnitt] = '--' 
                 else:
                     daten_ohne_none[raum][abschnitt] = str(int(self.daten[raum][abschnitt]))
+                tmp = datenbank.choose(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), raum, abschnitt, special_values=True)             
+                if abschnitt not in special_data[raum].keys():
+                    special_data[raum][abschnitt] = {}
+                if tmp['durchschnitt'] != None:  
+                    special_data[raum][abschnitt]['Durchschnitt'] = str(int(tmp['durchschnitt']))
+                    special_data[raum][abschnitt]['Minimum'] = str(int(tmp['min']))
+                    special_data[raum][abschnitt]['Maximum'] = str(int(tmp['max']))
+                else:
+                    special_data[raum][abschnitt]['Durchschnitt'] = '--'
+                    special_data[raum][abschnitt]['Minimum'] = '--'
+                    special_data[raum][abschnitt]['Maximum'] = '--'
+                
 #         pprint(daten_ohne_none)
         for line in lines:
 #             print line,
-            if previous_line.find('value_text') != -1:
+            special_value = None
+            if previous_line.find('durchschnitt') != -1:
+                special_value = 'Durchschnitt'
+            elif previous_line.find('minimum') != -1:
+                special_value = 'Minimum'
+            elif previous_line.find('maximum') != -1:
+                special_value = 'Maximum'
+            if special_value != None:
+                if current_section == 'Temperatur':
+                    if first_occurence:
+                        line = ' ' *12 + special_data[u'Raum1'][current_section][special_value]
+                    else:
+                        line = ' ' *12 + special_data[u'Außen'][current_section][special_value]
+                elif current_section == 'Luftdruck':
+                    line = ' ' *8 + special_data[u'Außen'][current_section][special_value]
+                elif current_section == 'Feuchtigkeit':
+                    line = ' ' *12 + special_data[u'Raum1'][current_section][special_value]
+                elif current_section == 'Licht':
+                    line = ' ' *8 + special_data[u'Außen'][current_section][special_value]
+                line += '\n'               
+                pdb.set_trace()
+
+            elif previous_line.find('value_text') != -1:
                 if current_section == 'Temperatur':
                     if first_occurence:
                         line = ' ' *12 + daten_ohne_none[u'Raum1'][current_section]
@@ -190,11 +227,7 @@ class Sensoren:
                 elif current_section == 'Luftdruck':
                     line = ' ' *8 + daten_ohne_none[u'Außen'][current_section]
                 elif current_section == 'Feuchtigkeit':
-                    if first_occurence:
-                        line = ' ' *12 + daten_ohne_none['Raum1'][current_section]
-                        first_occurence = False
-                    else:
-                        line = ' ' *12 + daten_ohne_none[u'Raum2'][current_section]
+                    line = ' ' *12 + daten_ohne_none['Raum1'][current_section]
                 elif current_section == 'Licht':
                     line = ' ' *8 + daten_ohne_none[u'Außen'][current_section]
                 line += '\n'
@@ -205,7 +238,6 @@ class Sensoren:
                 current_section = 'Luftdruck'
             elif line.find('Feuchtigkeit') != -1:
                 current_section = 'Feuchtigkeit'
-                first_occurence = True
             elif line.find('Helligkeit') != -1:
                 current_section = 'Licht'
 
@@ -232,6 +264,7 @@ if __name__ == '__main__':
     
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
+    PARSER.add_argument('--alleerlauben', action='store_true', help='Erlaube alles Werte, ohne auf interne Grenzen zu achten')
     PARSER.add_argument('--diagramme', action='store_true', help='Generiert die Diagramme zur Anzeige auf der Webseite')
     PARSER.add_argument('--erststart', action='store_true', help='Generiert alle Diagramme neu')
     PARSER.add_argument('--kamera', action='store_true', help='Schieße ein neues Bild')
@@ -246,11 +279,17 @@ if __name__ == '__main__':
 # Update Database?
     if ARGS.aktualisieren:
         S.sensoren_auslesen()
-        D.add_all(S.daten)
+        D.add_all(S.daten, ARGS.alleerlauben)
 #         d.add('Server', 'Temperatur', random.random()*30)
         D.con.commit()
 #         print(d.get_latest('Server', 'Temperatur'))
-        S.write_to_file()
+        S.write_to_file(D)
+    if ARGS.kamera:
+        print('Aufnahme Kamerabild')
+        c = Camera()
+        if c.take_picture():
+            print('Kamerabild herunterladen')        
+            c.download_picture()
     if ARGS.diagramme:
 # Generate Graphs
         G = D3.diagramme.Graphs(D, D3.config.FULL_BASE_PATH, ARGS.erststart)

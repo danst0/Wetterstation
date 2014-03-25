@@ -272,6 +272,8 @@ class Graphs:
 #             loc = matplotlib.dates.WeekdayLocator(byweekday=(matplotlib.dates.SA, matplotlib.dates.SU, matplotlib.dates.TU, matplotlib.dates.TH))
         einheit = {u'Temperatur': u'°C', u'Luftdruck': 'hPa', u'Feuchtigkeit': '%', u'Licht': 'lx'}
         ax.xaxis.set_major_locator(loc)
+        ax.yaxis.get_major_formatter().set_useOffset(False)
+        ax.yaxis.get_major_formatter().set_scientific(False)
 #         gca().tight_layout()
         for raum in raeume:
             for art in arten:

@@ -20,7 +20,6 @@ from Adafruit_I2C import Adafruit_I2C
 
 class TSL2561:
     i2c = None
-
     def __init__(self, address=0x39, debug=0, pause=0.8):
         self.i2c = Adafruit_I2C(address, busnum=0)
         self.address = address
@@ -50,12 +49,14 @@ class TSL2561:
         try:
             wordval = self.i2c.readU16(reg)
             newval = self.i2c.reverseByteOrder(wordval)
+#             print 'newval', newval
             if (self.debug):
                 print("I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, wordval & 0xFFFF, reg))
             return newval
         except IOError:
             print("Error accessing 0x%02X: Check your I2C address" % self.address)
-            return -1
+#             print 'read', reg
+            return None
 
 
     def readFull(self, reg=0x8C):
@@ -73,14 +74,25 @@ class TSL2561:
             ambient = self.readFull()
             IR = self.readIR()
         elif (gain==0): # auto gain
+            if (self.debug):
+                print 'Auto gain'
             self.setGain(16) # first try highGain
             ambient = self.readFull()
+            if (self.debug):
+                print 'High gain ambient', ambient
+            
             if (ambient < 65535):
                 IR = self.readIR()
+                if (self.debug):
+                    print 'High gain IR', IR
+            
             if (ambient >= 65535 or IR >= 65535): # value(s) exeed(s) datarange
                 self.setGain(1) # set lowGain
                 ambient = self.readFull()
                 IR = self.readIR()
+                if (self.debug):
+                    print 'Too high, low gain ambient, IR', ambient, IR
+            
 
         if (self.gain==1):
            ambient *= 16    # scale 1x to 16x
@@ -108,7 +120,7 @@ class TSL2561:
         return lux
 
 if __name__ == "__main__":
-    tsl=TSL2561()
+    tsl=TSL2561(debug=True)
     print tsl.readLux()
 #print "LUX HIGH GAIN ", tsl.getLux(16)
 #print "LUX LOW GAIN ", tsl.getLux(1)

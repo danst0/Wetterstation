@@ -47,29 +47,28 @@ class BMP085 :
   _cal_MC = 0
   _cal_MD = 0
 
-  def check_availability(self):
-    result = self.readS16(self.__BMP085_CAL_AC1)
-    print result
-    raw_input()
-    return True
+  def available(self):
+    avail = True
+    result = self.readRawTemp()
+    if result == None:
+        avail = False
+    return avail
+
   # Constructor
   def __init__(self, address=0x77, mode=1, bus=-1, debug=False):
     self.i2c = Adafruit_I2C(address, busnum=bus)
 
     self.address = address
     self.debug = debug
-    if self.check_availability():
-        # Make sure the specified mode is in the appropriate range
-        if ((mode < 0) | (mode > 3)):
-          if (self.debug):
-            print "Invalid Mode: Using STANDARD by default"
-          self.mode = self.__BMP085_STANDARD
-        else:
-          self.mode = mode
-        # Read the calibration data
-        self.readCalibrationData()
+    # Make sure the specified mode is in the appropriate range
+    if ((mode < 0) | (mode > 3)):
+      if (self.debug):
+        print "Invalid Mode: Using STANDARD by default"
+      self.mode = self.__BMP085_STANDARD
     else:
-        i2c = None
+      self.mode = mode
+    # Read the calibration data
+    self.readCalibrationData()
         
 
   def readS16(self, register):
@@ -116,15 +115,18 @@ class BMP085 :
 
   def readRawTemp(self):
     "Reads the raw (uncompensated) temperature from the sensor"
-    print 'lese temp'
+#     print 'lese temp'
     result = self.i2c.write8(self.__BMP085_CONTROL, self.__BMP085_READTEMPCMD)
-    print result
-    raw_input()
-    time.sleep(0.005)  # Wait 5ms
-    raw = self.readU16(self.__BMP085_TEMPDATA)
-    if (self.debug):
-      print "DBG: Raw Temp: 0x%04X (%d)" % (raw & 0xFFFF, raw)
-    return raw
+#     print result
+#     raw_input()
+    if result != -1:
+        time.sleep(0.005)  # Wait 5ms
+        raw = self.readU16(self.__BMP085_TEMPDATA)
+        if (self.debug):
+          print "DBG: Raw Temp: 0x%04X (%d)" % (raw & 0xFFFF, raw)
+        return raw
+    else:
+        return None
 
   def readRawPressure(self):
     "Reads the raw (uncompensated) pressure level from the sensor"
