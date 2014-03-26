@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import subprocess
+import shutil
 
 class Camera:
     camera_ip = 'sigma'
@@ -11,7 +12,13 @@ class Camera:
 
     def sshexec(self, command):
 #         print(command)
-        p = subprocess.check_call(command, stdin=None, stdout=None, stderr=None)
+        success = True
+        try:
+            p = subprocess.check_call(command, stdin=None, stdout=None, stderr=None)
+        except subprocess.CalledProcessError as e:
+            print e
+            success = False
+        return success
         
     def download_picture(self):
         command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':' + self.remote_folder+'webcam.jpg', self.local_folder]
@@ -31,9 +38,11 @@ class Camera:
         
     def take_picture(self):
         command = ['/usr/bin/ssh', self.remote_user+'@'+self.camera_ip, self.remote_folder+'camera.py', '--picture']
-        self.sshexec(command)
-        return True
-        
+        tmp = self.sshexec(command)
+        return tmp
+    def alternative_picture(self):
+        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+'webcam.jpg')
+        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+'webcam_panorama.jpg')    
     def take_full_panorama(self):
         command = ['/usr/bin/ssh', self.remote_user+'@'+self.camera_ip, self.remote_folder+'camera.py', '--fullpanorama']
         self.sshexec(command)
