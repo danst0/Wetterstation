@@ -13,6 +13,7 @@ import D3.config
 from pprint import pprint
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
+import pdb
 
 class Graphs:
     font = {
@@ -77,13 +78,15 @@ class Graphs:
             for time in times:
                 counter = 0
                 i = 0
-                average = 0
+                average = None
                 while i < len(daten):
                     datum = daten[i]
 #                     print datum
                     if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
@@ -111,11 +114,14 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=1.5) and datum[0] < time + datetime.timedelta(hours=1.5):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if average != 0:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('30 Tage'):
             first_point = datetime.datetime.now()
 #             print first_point
@@ -138,11 +144,14 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=6) and datum[0] < time + datetime.timedelta(hours=6):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if average != 0:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('1 Quartal'):
             first_point = datetime.datetime.now()
 #             print first_point
@@ -163,11 +172,14 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(hours=24) and datum[0] < time + datetime.timedelta(hours=24):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if average != 0:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
 
         elif dauer.startswith('1 Jahr'):
             first_point = datetime.datetime.now()
@@ -186,11 +198,14 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(days=3) and datum[0] < time + datetime.timedelta(days=3):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if average != 0:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
         elif dauer.startswith('Alles'):
             first_point = datetime.datetime.now()
             first_point = first_point.replace(month=first_point.month, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -209,11 +224,14 @@ class Graphs:
                     if datum[0] >= time - datetime.timedelta(days=15) and datum[0] < time + datetime.timedelta(days=15):
                         del daten[i]
                         counter += 1
+                        if average == None:
+                            average = 0
                         average += datum[4]
                     i += 1
                 if counter > 0:
                     average = average/float(counter)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if average != 0:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
 
 
         else:
@@ -279,20 +297,19 @@ class Graphs:
             for art in arten:
                 plt.ylabel(art + ' ' + einheit[art])
                 daten = self.d.choose(von, bis, raum, art)
-#                 pprint(daten)
                 aggregat = self.aggregate_data(daten['roh'], basename)
                 list_of_datetimes = map(lambda x: x[0], aggregat)
                 datum = matplotlib.dates.date2num(list_of_datetimes)   
 #                 pprint(aggregat)
                 inhalt = map(lambda x: x[4], aggregat)
+#                 pprint(inhalt)
                 if art == 'Licht':
                     ax.set_yscale('log')
                     ax.yaxis.set_major_formatter(ScalarFormatter())
                     inhalt = map(lambda x: x+1, inhalt)
-#                 inhalt = map(lambda x: None if x==0 else x, inhalt)
-
-		if inhalt != []:
-                    plt.plot(datum, inhalt, label=raum, marker='.')
+            	if inhalt != []:
+    	            plt.plot(datum, inhalt, label=raum, marker='.')
+#         pdb.set_trace()
         if hd:
             plt.legend(loc='best')
             fig.suptitle(u'Verlauf zwischen ' + von.strftime('%d.%m.%Y %H:%M') + ' und ' + bis.strftime('%d.%m.%Y %H:%M'), fontsize=8)
