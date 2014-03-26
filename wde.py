@@ -51,7 +51,7 @@ if __name__ == '__main__':
         print('Vorhandene Ports: ' + ', '.join(ports))
         sys.exit(1)
     try:
-        serial = serial.Serial(com_port, baudrate=9600, timeout=30)
+        serial = serial.Serial(com_port, baudrate=9600, timeout=90)
     except:
         print 'Serielle Schnittstelle lässt sich nicht ansprechen'
         sys.exit(1)

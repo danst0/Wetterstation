@@ -59,12 +59,16 @@ class Sensoren:
             # should be exception
 #         fields = string.split(';')
 #         print len(fields)
-#         pprint(fields)
-        self.daten['Raum1']['Temperatur'] = fields[1]
-        self.daten['Raum1']['Feuchtigkeit'] = fields[9]
-        self.daten['Raum2']['Temperatur'] = None #float(fields[19].replace(',', '.'))
-        self.daten['Raum2']['Feuchtigkeit'] = None #float(fields[21].replace(',', '.'))
-        return True
+#         pprint(fields[-1])
+        if len(fields) > 0 and fields[-1] > datetime.datetime.now()-datetime.timedelta(hours=1):
+#             print 'Go'
+            self.daten['Raum1']['Temperatur'] = fields[1]
+            self.daten['Raum1']['Feuchtigkeit'] = fields[9]
+            self.daten['Raum2']['Temperatur'] = None #float(fields[19].replace(',', '.'))
+            self.daten['Raum2']['Feuchtigkeit'] = None #float(fields[21].replace(',', '.'))                
+            return True
+        else:
+            return False
 
     def read_i2c(self):
         print 'Lokale I2C-Sensoren auslesen'
@@ -290,6 +294,8 @@ if __name__ == '__main__':
         if c.take_picture():
             print('Kamerabild herunterladen')        
             c.download_picture()
+        else:
+            c.alternative_picture()
     if ARGS.diagramme:
 # Generate Graphs
         G = D3.diagramme.Graphs(D, D3.config.FULL_BASE_PATH, ARGS.erststart)
