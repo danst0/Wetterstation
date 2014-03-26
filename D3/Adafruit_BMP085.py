@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import time
 from Adafruit_I2C import Adafruit_I2C
