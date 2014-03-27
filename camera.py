@@ -30,8 +30,8 @@ class Camera:
 #             print e.output
 #             return False
 # #         print output
-        print 'Ergänze Bildunterschrift, konvertieren, normalisieren, drehen'
-        command = [convert, image_raw, '-pointsize', '72', '-fill', 'white', '-gravity', 'SouthWest', '-annotate', '+50+100', 'D3 Wetterstation %[exif:DateTimeOriginal]', '-normalize', '-rotate', str(self.rotation), image]
+        print 'Ergänzen Bildunterschrift, konvertieren, normalisieren, drehen'
+        command = [convert, image_raw, '-normalize', '-rotate', str(self.rotation), '-pointsize', '72', '-fill', 'white', '-gravity', 'SouthWest', '-annotate', '+50+100', 'D3 Wetterstation %[exif:DateTimeOriginal]', image]
         try:
             output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, e:
@@ -44,6 +44,7 @@ class Camera:
         size_x = 2592
         size_y = 1944
         percentage = 0.60
+        print 'Erstellen Zuschnitt für Webseite'
         command = [convert, image, '-crop', str(size_x)+'x'+str(int(size_y*percentage))+'+0+'+str(size_y-int(size_y*percentage)), image_pan_temp]
         try:
             output = subprocess.check_output(command, stderr=subprocess.STDOUT)
