@@ -9,8 +9,8 @@ local_path = '/home/danst/Wetterstation/'
 raspistill = '/opt/vc/bin/raspistill'
 convert = '/usr/bin/convert'
 class Camera:
-    def __init__(self):
-        pass
+    def __init__(self, rotation=180):
+        self.rotation = rotation
     def take_picture(self):
         print('Schiesse Foto')
         image_raw = local_path + 'webcamraw.jpg'
@@ -30,8 +30,8 @@ class Camera:
 #             print e.output
 #             return False
 # #         print output
-
-        command = [convert, image_raw, '-pointsize', '72', '-fill', 'white', '-gravity', 'SouthWest', '-annotate', '+50+100', 'D3 Wetterstation %[exif:DateTimeOriginal]', image]
+        print 'Ergänze Bildunterschrift, konvertieren, normalisieren, drehen'
+        command = [convert, image_raw, '-pointsize', '72', '-fill', 'white', '-gravity', 'SouthWest', '-annotate', '+50+100', 'D3 Wetterstation %[exif:DateTimeOriginal]', '-normalize', '-rotate', str(self.rotation), image]
         try:
             output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, e:
