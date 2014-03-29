@@ -3,13 +3,45 @@
 
 import subprocess
 import shutil
+import os
+import pdb
+import datetime
+import pickle
+import D3.config
 
 class Camera:
-    camera_ip = 'sigma'
-    local_folder = '/home/danst/Wetterstation/html/webcam/'
-    remote_folder = '/home/danst/Wetterstation/'
-    remote_user = 'danst'
+    def __init__(self):
+        self.camera_ip = 'sigma'
+        self.local_folder = '/home/danst/Wetterstation/html/webcam/'
+        self.remote_folder = '/home/danst/Wetterstation/'
+        self.remote_user = 'danst'
+        self.name_small_file = 'webcam.jpg'
+        self.name_large_file = 'webcam_panorama.jpg'
+        try:
+            self.last_time = pickle.load(open(D3.config.FULL_BASE_PATH + 'camera.pickle', 'rb'))
+        except:
+            self.last_time = 0
+    def rotate_pictures(self):
+        basename_small = self.name_small_file[:self.name_small_file.rfind('.')]
+        basename_large = self.name_large_file[:self.name_large_file.rfind('.')]
+        print basename_small, basename_large
+#         pdb.set_trace()
+        for filename in [{'base':basename_small, 'all': self.name_small_file},{'base':basename_large, 'all': self.name_large_file}]:
+            for i in range(22,0,-1):
+#                 print i
+                if os.path.isfile(self.local_folder+filename['base']+'-'+str(i)+'.jpg'):
+#                     print 'moving', filename['base']+'-'+str(i)+'.jpg', filename['base']+'-'+str(i+1)+'.jpg'
+                    shutil.move(self.local_folder+filename['base']+'-'+str(i)+'.jpg', self.local_folder+filename['base']+'-'+str(i+1)+'.jpg')
+            shutil.move(self.local_folder+filename['all'], self.local_folder+filename['base']+'-1.jpg')
 
+    def is_hourly_picture(self):
+        next_hour = False
+#         pdb.set_trace()
+        if datetime.datetime.now().hour != self.last_time:
+            next_hour = True
+            self.last_time = datetime.datetime.now().hour
+            pickle.dump(self.last_time, open(D3.config.FULL_BASE_PATH + 'camera.pickle', 'wb'))
+        return next_hour
     def sshexec(self, command):
 #         print(command)
         success = True
@@ -20,9 +52,9 @@ class Camera:
             success = False
         return success
         
-    def download_picture(self):
-        command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':' + self.remote_folder+'webcam.jpg', self.local_folder]
-        self.sshexec(command)
+#     def download_picture(self):
+#         command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':' + self.remote_folder+self.name_small_file, self.local_folder]
+#         self.sshexec(command)
 
     def download_panorama(self):
         command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':'+self.remote_folder+'panorama.png', self.local_folder]
@@ -30,9 +62,11 @@ class Camera:
 
 
     def download_picture(self):
-        command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':'+self.remote_folder+'webcam.jpg', self.local_folder]
+        if self.is_hourly_picture():
+            self.rotate_pictures()
+        command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':'+self.remote_folder+self.name_small_file, self.local_folder]
         self.sshexec(command)
-        command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':'+self.remote_folder+'webcam_panorama.jpg', self.local_folder]
+        command = ['/usr/bin/scp', self.remote_user+'@'+self.camera_ip+':'+self.remote_folder+self.name_large_file, self.local_folder]
         self.sshexec(command)
 
         
@@ -41,11 +75,11 @@ class Camera:
         tmp = self.sshexec(command)
         return tmp
     def alternative_picture(self):
-        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+'webcam.jpg')
-        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+'webcam_panorama.jpg')    
+        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+self.name_small_file)
+        shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+self.name_large_file)    
     def take_full_panorama(self):
-        command = ['/usr/bin/ssh', self.remote_user+'@'+self.camera_ip, self.remote_folder+'camera.py', '--fullpanorama']
-        self.sshexec(command)
+        command = ['/usr/bin/ssh', self.remote_user+'@'+self.camera_ip, self.remote_folder+'camera.py',      '--fullpanorama']
+        self.sshexec( )   
         return True
 
     def move_camera(self, delta_x=0, delta_y=0):

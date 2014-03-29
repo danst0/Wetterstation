@@ -197,6 +197,7 @@ class Sensoren:
                     special_data[raum][abschnitt]['Maximum'] = '--'
                 
 #         pprint(daten_ohne_none)
+#         pdb.set_trace()
         for line in lines:
 #             print line,
             special_value = None
