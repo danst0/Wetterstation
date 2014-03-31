@@ -9,7 +9,7 @@ import config
 import math
 
 class Database:
-    maximum_deviation = {'Feuchtigkeit': 0.15, 'Licht': 999999.0, 'Temperatur': 0.3, 'Luftdruck': 0.2}
+    maximum_deviation = {'Feuchtigkeit': 1.15, 'Licht': 999999.0, 'Temperatur': 1.3, 'Luftdruck': 1.2}
     file = config.FULL_BASE_PATH + 'wetter.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
@@ -85,6 +85,8 @@ class Database:
 #         print tmp
         return map(lambda x: x[0], tmp)
 
+    def commit(self):
+        self.con.commit()
     
     def get_latest(self, raum, art):
         self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=? ORDER by datum DESC', (raum, art))

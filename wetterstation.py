@@ -10,7 +10,7 @@ Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung pe
 import pdb
 import sys
 import os
-# import __main__
+import __main__
 import datetime
 from pprint import pprint
 
@@ -254,18 +254,18 @@ class Sensoren:
             file_handle.write(neue_zeilen)
         file_handle.close()
 
-# def isOnlyInstance():
-#     # Determine if there are more than the current instance of the application
-#     # running at the current time.
-#     return os.system("(( $(ps -ef | grep python | grep '[" +
-#                      __main__.__file__[0] + "]" + __main__.__file__[1:] +
-#                      "' | wc -l) > 1 ))") != 0
+def isOnlyInstance():
+    # Determine if there are more than the current instance of the application
+    # running at the current time.
+    return os.system("(( $(ps -ef | grep python | grep '[" +
+                     __main__.__file__[0] + "]" + __main__.__file__[1:] +
+                     "' | wc -l) > 1 ))") != 0
 
 if __name__ == '__main__':
     
-#     if not isOnlyInstance():
-#         print 'Es kann nur eine Instanz der Wetterstation laufen.'
-#         sys.exit()
+    if not isOnlyInstance():
+        print 'Es kann nur eine Instanz der Wetterstation laufen.'
+        sys.exit()
     
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
@@ -286,7 +286,7 @@ if __name__ == '__main__':
         S.sensoren_auslesen()
         D.add_all(S.daten, ARGS.alleerlauben)
 #         d.add('Server', 'Temperatur', random.random()*30)
-        D.con.commit()
+        D.commit()
 #         print(d.get_latest('Server', 'Temperatur'))
         S.write_to_file(D)
     if ARGS.kamera:
@@ -303,4 +303,4 @@ if __name__ == '__main__':
         G.generate_graphs()
         G.close()
 #     print("Beende Wetterstation")
-
+    D.close()

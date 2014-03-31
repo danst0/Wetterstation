@@ -306,7 +306,7 @@ class Graphs:
                 if art == 'Licht':
                     ax.set_yscale('log')
                     ax.yaxis.set_major_formatter(ScalarFormatter())
-                    inhalt = map(lambda x: x+1, inhalt)
+                    inhalt = map(lambda x: x+1 if x != None else 1, inhalt)
             	if inhalt != []:
     	            plt.plot(datum, inhalt, label=raum, marker='.')
 #         pdb.set_trace()
