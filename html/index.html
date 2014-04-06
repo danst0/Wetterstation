@@ -66,6 +66,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Temperatur_1 Stunde',
                 'diagramme/Raeume_Temperatur_24 Stunden',
+                'diagramme/Raeume_Temperatur_72 Stunden',
                 'diagramme/Raeume_Temperatur_7 Tage',
                 'diagramme/Raeume_Temperatur_30 Tage',
                 'diagramme/Raeume_Temperatur_1 Quartal',
@@ -75,6 +76,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Feuchtigkeit_1 Stunde',
                 'diagramme/Raeume_Feuchtigkeit_24 Stunden',
+                'diagramme/Raeume_Feuchtigkeit_72 Stunden',
                 'diagramme/Raeume_Feuchtigkeit_7 Tage',
                 'diagramme/Raeume_Feuchtigkeit_30 Tage',
                 'diagramme/Raeume_Feuchtigkeit_1 Quartal',
@@ -84,6 +86,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Luftdruck_1 Stunde',
                 'diagramme/Raeume_Luftdruck_24 Stunden',
+                'diagramme/Raeume_Luftdruck_72 Stunden',
                 'diagramme/Raeume_Luftdruck_7 Tage',
                 'diagramme/Raeume_Luftdruck_30 Tage',
                 'diagramme/Raeume_Luftdruck_1 Quartal',
@@ -93,6 +96,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Licht_1 Stunde',
                 'diagramme/Raeume_Licht_24 Stunden',
+                'diagramme/Raeume_Licht_72 Stunden',
                 'diagramme/Raeume_Licht_7 Tage',
                 'diagramme/Raeume_Licht_30 Tage',
                 'diagramme/Raeume_Licht_1 Quartal',
@@ -274,15 +278,16 @@ Alle Daten
 <div id="temperature" class="datenblock">
 <h2>Temperatur</h2>
 <div class="topright">
-<select onchange="show(1, this.value);" id="select1" class="selection">
-    <option value="1">Letzten 60 Minuten</option>
-    <option value="2">Letzten 24 Stunden</option>
-    <option value="3">Letzte Woche</option>
-    <option value="4">Letzter Monat</option>
-    <option value="5">Letztes Quartal</option>
-    <option value="6">Letztes Jahr</option>        
-    <option value="7">Alle Daten</option>        
-</select>
+    <select onchange="show(1, this.value);" id="select1" class="selection">
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>          
+    </select>
 </div>
     <div class="picture">
 
@@ -294,13 +299,14 @@ Alle Daten
 <h2>Feuchtigkeit</h2>
 <div class="topright">
     <select onchange="show(2, this.value);" id="select2" class="selection">
-        <option value="1">Letzten 60 Minuten</option>
-        <option value="2">Letzten 24 Stunden</option>
-        <option value="3">Letzte Woche</option>
-        <option value="4">Letzter Monat</option>
-        <option value="5">Letztes Quartal</option>
-        <option value="6">Letztes Jahr</option>        
-        <option value="7">Alle Daten</option>        
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>            
     </select>
 </div>
     <div class="picture">
@@ -317,11 +323,12 @@ Alle Daten
         <select id="select3" onchange="show(3, this.value);" class="selection">
             <option value="1">Letzten 60 Minuten</option>
             <option value="2">Letzten 24 Stunden</option>
-            <option value="3">Letzte Woche</option>
-            <option value="4">Letzter Monat</option>
-            <option value="5">Letztes Quartal</option>
-            <option value="6">Letztes Jahr</option>        
-            <option value="7">Alle Daten</option>        
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>           
         </select>
     </div>
     <div class="picture">
@@ -337,11 +344,12 @@ Alle Daten
         <select id="select4" onchange="show(4, this.value);" class="selection">
             <option value="1">Letzten 60 Minuten</option>
             <option value="2">Letzten 24 Stunden</option>
-            <option value="3">Letzte Woche</option>
-            <option value="4">Letzter Monat</option>
-            <option value="5">Letztes Quartal</option>
-            <option value="6">Letztes Jahr</option>        
-            <option value="7">Alle Daten</option>        
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>        
         </select>
     </div>
     <div class="picture">

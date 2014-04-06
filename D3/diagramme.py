@@ -14,6 +14,7 @@ from pprint import pprint
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 import pdb
+import numpy
 
 class Graphs:
     font = {
@@ -27,18 +28,20 @@ class Graphs:
         self.d = datenbank
         self.full_base_path = full_base_path
         self.last_generation = {}
-        if not erststart:
+        self.erststart = erststart
+        if not self.erststart:
             try:
                 self.last_generation = pickle.load(open(D3.config.FULL_BASE_PATH + 'data.pickle', 'rb'))
             except:
                 self.last_generation = {}                
-        self.generation_limits = {  'Alles':        96*60*60,
-                                    '1 Jahr':       96*60*60,
-                                    '1 Quartal':    48*60*60,
-                                    '30 Tage':      24*60*60,
-                                    '7 Tage':       6*60*60,
-                                    '24 Stunden':   20*60,
-                                    '1 Stunde':     60}
+        self.generation_limits = {  'Alles':        2*10*24*60*60,
+                                    '1 Jahr':       2*6*24*60*60,
+                                    '1 Quartal':    2*48*60*60,
+                                    '30 Tage':      2*12*60*60,
+                                    '7 Tage':       2*3*60*60,
+                                    '72 Stunden':   2*1.5*60*60,
+                                    '24 Stunden':   2*30*60,
+                                    '1 Stunde':     2*3*60}
         self.diagramm_counter = 0
     def close(self):
         pickle.dump(self.last_generation, open(D3.config.FULL_BASE_PATH + 'data.pickle', 'wb'))
@@ -47,6 +50,7 @@ class Graphs:
 #         updatefrequenz: 3 min -> 20 Werte pro Stunde
 #         60 min -> nicht (20 Werte)
 #         24h -> 30 min (48)
+#         72h -> 90 min (48)
 #         1 Woche -> 3h (56)
 #         1 Monat -> 12 h (60)
 #         1 Quartal -> 48 h (45)
@@ -70,29 +74,78 @@ class Graphs:
             first_point = first_point.replace(minute=halbe_stunde, second=0, microsecond=0)
             first_point = first_point + datetime.timedelta(hours=zusatz)
 #             print first_point
-            times = []
-            for i in range(48):
-                times.append(first_point - datetime.timedelta(minutes=30*i))
-#             pprint(times)
-#             sys.exit()
+#             times = []
+#             for i in range(48):
+#                 times.append(first_point - datetime.timedelta(minutes=30*i))
+# #             pprint(times)
+# #             sys.exit()
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = None
+#                 while i < len(daten):
+#                     datum = daten[i]
+# #                     print datum
+#                     if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+# #                 pprint(daten)
+#                 neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+            times = [first_point - datetime.timedelta(minutes=30*i) for i in range(48)]
             for time in times:
-                counter = 0
-                i = 0
-                average = None
-                while i < len(daten):
-                    datum = daten[i]
-#                     print datum
-                    if datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-#                 pprint(daten)
-                neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(minutes=15) and datum[0] < time + datetime.timedelta(minutes=15), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(minutes=15) or datum[0] >= time + datetime.timedelta(minutes=15), daten)
+
+
+
+        elif dauer.startswith('72 Stunden'):
+            first_point = datetime.datetime.now()
+#             print first_point
+#             pdb.set_trace()
+            neunzig_minuten = int(round((first_point.hour)/24.0*16, 0)/16.0*24)
+            zusatz = 0
+            if neunzig_minuten == 24:
+                neunzig_minuten = 0
+                zusatz = 1
+            first_point = first_point.replace(hour=neunzig_minuten, minute=0, second=0, microsecond=0)
+            first_point = first_point + datetime.timedelta(days=zusatz)
+#             print first_point
+            # times = []
+#             for i in range(48):
+#                 times.append(first_point - datetime.timedelta(minutes=90*i))
+# #             pprint(times)
+# #             sys.exit()
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = None
+#                 while i < len(daten):
+#                     datum = daten[i]
+# #                     print datum
+#                     if datum[0] >= time - datetime.timedelta(minutes=45) and datum[0] < time + datetime.timedelta(minutes=45):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+# #                 pprint(daten)
+#                 neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+            times = [first_point - datetime.timedelta(minutes=90*i) for i in range(48)]
+            for time in times:
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(minutes=45) and datum[0] < time + datetime.timedelta(minutes=45), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(minutes=45) or datum[0] >= time + datetime.timedelta(minutes=45), daten)
+                
         elif dauer.startswith('7 Tage'):
             first_point = datetime.datetime.now()
             drei_stunden = int(round((first_point.hour)/24.0*8, 0)/8.0*24)
@@ -102,26 +155,33 @@ class Graphs:
                 zusatz = 1
             first_point = first_point.replace(hour=drei_stunden, minute=0, second=0, microsecond=0)
             first_point = first_point + datetime.timedelta(days=zusatz)
-            times = []
-            for i in range(56):
-                times.append(first_point - datetime.timedelta(hours=3*i))
+#             times = []
+#             for i in range(56):
+#                 times.append(first_point - datetime.timedelta(hours=3*i))
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = 0
+#                 while i < len(daten):
+#                     datum = daten[i]
+#                     if datum[0] >= time - datetime.timedelta(hours=1.5) and datum[0] < time + datetime.timedelta(hours=1.5):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+#                 if average != 0:
+#                     neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+
+            times = [first_point - datetime.timedelta(hours=3*i) for i in range(56)]
             for time in times:
-                counter = 0
-                i = 0
-                average = 0
-                while i < len(daten):
-                    datum = daten[i]
-                    if datum[0] >= time - datetime.timedelta(hours=1.5) and datum[0] < time + datetime.timedelta(hours=1.5):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-                if average != 0:
-                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(hours=1.5) and datum[0] < time + datetime.timedelta(hours=1.5), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(hours=1.5) or datum[0] >= time + datetime.timedelta(hours=1.5), daten)
+
         elif dauer.startswith('30 Tage'):
             first_point = datetime.datetime.now()
 #             print first_point
@@ -130,108 +190,110 @@ class Graphs:
                 zwoelf_stunden = 0
             first_point = first_point.replace(hour=zwoelf_stunden, minute=0, second=0, microsecond=0)
 #             print first_point
-            times = []
-            for i in range(60):
-                times.append(first_point - datetime.timedelta(hours=12*i))
-#             pprint(times)
-#             sys.exit()
+#             times = []
+#             for i in range(60):
+#                 times.append(first_point - datetime.timedelta(hours=12*i))
+# #             pprint(times)
+# #             sys.exit()
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = 0
+#                 while i < len(daten):
+#                     datum = daten[i]
+#                     if datum[0] >= time - datetime.timedelta(hours=6) and datum[0] < time + datetime.timedelta(hours=6):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+#                 if average != 0:
+#                     neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+            times = [first_point - datetime.timedelta(hours=12*i) for i in range(60)]
             for time in times:
-                counter = 0
-                i = 0
-                average = 0
-                while i < len(daten):
-                    datum = daten[i]
-                    if datum[0] >= time - datetime.timedelta(hours=6) and datum[0] < time + datetime.timedelta(hours=6):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-                if average != 0:
-                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(hours=6) and datum[0] < time + datetime.timedelta(hours=6), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(hours=6) or datum[0] >= time + datetime.timedelta(hours=6), daten)
+
         elif dauer.startswith('1 Quartal'):
             first_point = datetime.datetime.now()
+#             xxx hier passt was nicht. vgl. mit quartal
 #             print first_point
             stunden = int(round((first_point.hour)/24.0/2, 0)*2.0*24)
             first_point = first_point.replace(hour=stunden, minute=0, second=0, microsecond=0)
 #             print first_point
-            times = []
-            for i in range(45):
-                times.append(first_point - datetime.timedelta(hours=12*i))
-#             pprint(times)
-#             sys.exit()
+#             times = []
+#             for i in range(45):
+#                 times.append(first_point - datetime.timedelta(hours=12*i))
+# #             pprint(times)
+# #             sys.exit()
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = 0
+#                 while i < len(daten):
+#                     datum = daten[i]
+#                     if datum[0] >= time - datetime.timedelta(hours=24) and datum[0] < time + datetime.timedelta(hours=24):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+#                 if average != 0:
+#                     neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+            times = [first_point - datetime.timedelta(hours=12*i) for i in range(45)]
             for time in times:
-                counter = 0
-                i = 0
-                average = 0
-                while i < len(daten):
-                    datum = daten[i]
-                    if datum[0] >= time - datetime.timedelta(hours=24) and datum[0] < time + datetime.timedelta(hours=24):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-                if average != 0:
-                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(hours=12) and datum[0] < time + datetime.timedelta(hours=12), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(hours=12) or datum[0] >= time + datetime.timedelta(hours=12), daten)
+
 
         elif dauer.startswith('1 Jahr'):
             first_point = datetime.datetime.now()
             tag = int(round((first_point.day)/360.0*60, 0)/60.0*360)
             ## MUSS GEFIXED werden, Was wenn im Februar auf den 30. eines Monats gerundet wird
             #first_point = first_point.replace(day=tag, hour=0, minute=0, second=0, microsecond=0)
-            times = []
-            for i in range(60):
-                times.append(first_point - datetime.timedelta(days=6*i))
+#             times = []
+#             for i in range(60):
+#                 times.append(first_point - datetime.timedelta(days=6*i))
+#             for time in times:
+#                 counter = 0
+#                 i = 0
+#                 average = 0
+#                 while i < len(daten):
+#                     datum = daten[i]
+#                     if datum[0] >= time - datetime.timedelta(days=3) and datum[0] < time + datetime.timedelta(days=3):
+#                         del daten[i]
+#                         counter += 1
+#                         if average == None:
+#                             average = 0
+#                         average += datum[4]
+#                     i += 1
+#                 if counter > 0:
+#                     average = average/float(counter)
+#                 if average != 0:
+#                     neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+            times = [first_point - datetime.timedelta(days=6*i) for i in range(60)]
             for time in times:
-                counter = 0
-                i = 0
-                average = 0
-                while i < len(daten):
-                    datum = daten[i]
-                    if datum[0] >= time - datetime.timedelta(days=3) and datum[0] < time + datetime.timedelta(days=3):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-                if average != 0:
-                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(days=3) and datum[0] < time + datetime.timedelta(days=3), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(days=3) and datum[0] >= time + datetime.timedelta(days=3), daten)
+
         elif dauer.startswith('Alles'):
             first_point = datetime.datetime.now()
             first_point = first_point.replace(month=first_point.month, day=1, hour=0, minute=0, second=0, microsecond=0)
-#             print first_point
-            times = []
-            for i in range(40):
-                times.append(first_point - datetime.timedelta(days=30*i))
-#             pprint(times)
-#             sys.exit()
+            times = [first_point - datetime.timedelta(days=30*i) for i in range(40)]
             for time in times:
-                counter = 0
-                i = 0
-                average = 0
-                while i < len(daten):
-                    datum = daten[i]
-                    if datum[0] >= time - datetime.timedelta(days=15) and datum[0] < time + datetime.timedelta(days=15):
-                        del daten[i]
-                        counter += 1
-                        if average == None:
-                            average = 0
-                        average += datum[4]
-                    i += 1
-                if counter > 0:
-                    average = average/float(counter)
-                if average != 0:
-                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], average))
+                if daten != []:
+                    neue_daten.append((time, daten[0][1], daten[0][2], daten[0][3], numpy.mean(map(lambda x: x[4], filter(lambda datum: datum[0] >= time - datetime.timedelta(days=15) and datum[0] < time + datetime.timedelta(days=15), daten)))))
+                daten = filter(lambda datum: datum[0] < time - datetime.timedelta(days=15) or datum[0] >= time + datetime.timedelta(days=15), daten)
+
 
 
         else:
@@ -239,15 +301,13 @@ class Graphs:
             neue_daten = copy.deepcopy(daten)            
 
                 
-              
 #             pprint (neue_daten)
-
 #             print viertel_stunde
-            
 #             sys.exit()
         return neue_daten
 
     def aggregate_graph(self, von, bis, raeume, arten, basename, date_format_string, groesse=(8,4), hd=False): 
+
         if hd:
             details=200
             basename = basename + '_hd'
@@ -276,8 +336,10 @@ class Graphs:
             else:
                 loc = matplotlib.dates.HourLocator(interval=4)
             
-        elif basename.startswith('24 Stunden'):
-            loc = matplotlib.dates.HourLocator()
+#         elif basename.startswith('24 Stunden'):
+#             loc = matplotlib.dates.HourLocator()
+        elif basename.startswith('72 Stunden'):
+            loc = matplotlib.dates.HourLocator(interval=12)
         elif basename.startswith('7 Tage'):
             loc = matplotlib.dates.DayLocator()
 #         elif basename.startswith('30 Tage'):
@@ -297,7 +359,11 @@ class Graphs:
             for art in arten:
                 plt.ylabel(art + ' ' + einheit[art])
                 daten = self.d.choose(von, bis, raum, art)
+#                 start_time = time.clock()
                 aggregat = self.aggregate_data(daten['roh'], basename)
+#                 elapsed_time = time.clock() - start_time
+#                 print "Time elapsed: {} seconds".format(elapsed_time)
+
                 list_of_datetimes = map(lambda x: x[0], aggregat)
                 datum = matplotlib.dates.date2num(list_of_datetimes)   
 #                 pprint(aggregat)
@@ -306,7 +372,9 @@ class Graphs:
                 if art == 'Licht':
                     ax.set_yscale('log')
                     ax.yaxis.set_major_formatter(ScalarFormatter())
-                    inhalt = map(lambda x: x+1 if x != None else 1, inhalt)
+                    if inhalt != []:
+#                         pdb.set_trace()
+                        inhalt = map(lambda x: x+1 if x != None else 1, inhalt)
             	if inhalt != []:
     	            plt.plot(datum, inhalt, label=raum, marker='.')
 #         pdb.set_trace()
@@ -320,7 +388,7 @@ class Graphs:
         fig.savefig(pfad)
         plt.close()
         self.diagramm_counter += 1
-        
+                
     def base_graph(self, von, bis, raum, art, basename, date_format_string):
         self.font['size'] = 9
         matplotlib.rc('font', **self.font)
@@ -374,21 +442,24 @@ class Graphs:
             if art in ['Licht', 'Feuchtigkeit']:
                 size = (3,3)
             
-            for details in [True, False]:
-                if self.check_time(art, details, '1 Stunde'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
-                if self.check_time(art, details, '24 Stunden'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)
-                if self.check_time(art, details, '7 Tage'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', datum_tag, groesse=size, hd=details)
-                if self.check_time(art, details, '30 Tage'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', nur_datum, groesse=size, hd=details)
-                if self.check_time(art, details, '1 Quartal'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', nur_datum, groesse=size, hd=details)
-                if self.check_time(art, details, '1 Jahr'):
-                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', nur_datum, groesse=size, hd=details)
+            for details in [False, True]:
                 if self.check_time(art, details, 'Alles'):
                     self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=11365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), 'Alles', nur_datum, groesse=size, hd=details)
+                elif self.check_time(art, details, '1 Jahr'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=365), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Jahr', nur_datum, groesse=size, hd=details)
+                elif self.check_time(art, details, '1 Quartal'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=90), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Quartal', nur_datum, groesse=size, hd=details)                
+                elif self.check_time(art, details, '30 Tage'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=30), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '30 Tage', nur_datum, groesse=size, hd=details)                
+                elif self.check_time(art, details, '7 Tage'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(days=7), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '7 Tage', datum_tag, groesse=size, hd=details)                
+                elif self.check_time(art, details, '72 Stunden'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=72), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '72 Stunden', datum_tag+' %H:%M', groesse=size, hd=details)
+                elif self.check_time(art, details, '24 Stunden'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '24 Stunden', '%H:%M', groesse=size, hd=details)                                    
+                elif self.check_time(art, details, '1 Stunde'):
+                    self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
+
         if self.diagramm_counter != 1:
             print self.diagramm_counter, 'Diagramme generiert'
         else:
