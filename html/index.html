@@ -21,11 +21,52 @@ Letztes Jahr
 Alle Daten
  -->
 
+<!-- use jssor.slider.mini.js (39KB) or jssor.sliderc.mini.js (31KB, with caption, no slideshow) or jssor.sliders.mini.js (26KB, no caption, no slideshow) instead for release -->
+<!-- jssor.slider.mini.js = jssor.sliderc.mini.js = jssor.sliders.mini.js = (jssor.core.js + jssor.utils.js + jssor.slider.js) -->
+<script type="text/javascript" src="/static/jssor.core.js"></script>
+<script type="text/javascript" src="/static/jssor.utils.js"></script>
+<script type="text/javascript" src="/static/jssor.slider.js"></script>
+<script>
+    jQuery(document).ready(function ($) {
+
+        var options = {
+            $DragOrientation: 3,                                //[Optional] Orientation to drag slide, 0 no drag, 1 horizental, 2 vertical, 3 either, default value is 1 (Note that the $DragOrientation should be the same as $PlayOrientation when $DisplayPieces is greater than 1, or parking position is not 0)
+            $SlideDuration: 900,                                //[Optional] Specifies default duration (swipe) for slide in milliseconds, default value is 500
+            $DirectionNavigatorOptions: {
+                $Class: $JssorDirectionNavigator$,              //[Requried] Class to create direction navigator instance
+                $ChanceToShow: 1,                               //[Required] 0 Never, 1 Mouse Over, 2 Always
+                $AutoCenter: 2,                                 //[Optional] Auto center arrows in parent container, 0 No, 1 Horizontal, 2 Vertical, 3 Both, default value is 0
+                $Steps: 1                                       //[Optional] Steps to go for each navigation request, default value is 1
+            }
+        };
+
+        var jssor_slider1 = new $JssorSlider$("slider1_container", options);
+        //responsive code begin
+        //you can remove responsive code if you don't want the slider scales while window resizes
+        function ScaleSlider() {
+            var parentWidth = jssor_slider1.$Elmt.parentNode.clientWidth;
+            if (parentWidth)
+                jssor_slider1.$SetScaleWidth(parentWidth);
+            else
+                window.setTimeout(ScaleSlider, 30);
+        }
+
+        //Scale slider immediately
+        ScaleSlider();
+
+        if (!navigator.userAgent.match(/(iPhone|iPod|iPad|BlackBerry|IEMobile)/)) {
+            $(window).bind('resize', ScaleSlider);
+        }
+        //responsive code end
+    });
+</script>
+
 <script type="text/javascript">
         var linkData = [
             [
                 'diagramme/Raeume_Temperatur_1 Stunde',
                 'diagramme/Raeume_Temperatur_24 Stunden',
+                'diagramme/Raeume_Temperatur_72 Stunden',
                 'diagramme/Raeume_Temperatur_7 Tage',
                 'diagramme/Raeume_Temperatur_30 Tage',
                 'diagramme/Raeume_Temperatur_1 Quartal',
@@ -35,6 +76,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Feuchtigkeit_1 Stunde',
                 'diagramme/Raeume_Feuchtigkeit_24 Stunden',
+                'diagramme/Raeume_Feuchtigkeit_72 Stunden',
                 'diagramme/Raeume_Feuchtigkeit_7 Tage',
                 'diagramme/Raeume_Feuchtigkeit_30 Tage',
                 'diagramme/Raeume_Feuchtigkeit_1 Quartal',
@@ -44,6 +86,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Luftdruck_1 Stunde',
                 'diagramme/Raeume_Luftdruck_24 Stunden',
+                'diagramme/Raeume_Luftdruck_72 Stunden',
                 'diagramme/Raeume_Luftdruck_7 Tage',
                 'diagramme/Raeume_Luftdruck_30 Tage',
                 'diagramme/Raeume_Luftdruck_1 Quartal',
@@ -53,6 +96,7 @@ Alle Daten
             [
                 'diagramme/Raeume_Licht_1 Stunde',
                 'diagramme/Raeume_Licht_24 Stunden',
+                'diagramme/Raeume_Licht_72 Stunden',
                 'diagramme/Raeume_Licht_7 Tage',
                 'diagramme/Raeume_Licht_30 Tage',
                 'diagramme/Raeume_Licht_1 Quartal',
@@ -125,14 +169,14 @@ Alle Daten
 
 </script>            
 
-<title>D3-Wetterstation</title>
+<title>D3 Wetterstation</title>
 </head>
 <body>
 
 <div id="header">
     <h1>
 <!--         <a href="/"> -->
-            D<sup>3</sup>-Wetterstation
+            D<sup>3</sup> Wetterstation
 <!--         </a> -->
     </h1>
 </div>
@@ -150,26 +194,100 @@ Alle Daten
 
 <div id="camera" class="datenblock">
     <h2>Kamera</h2>
+<!-- 
     <div class="topright">
         <a id="camera_reload" href="#" class="reload">Neu laden</a>
     </div>
+ -->
+    
+    <!-- Jssor Slider Begin -->
+    <!-- You can move inline styles (except 'top', 'left', 'width' and 'height') to css file or css block. -->
+<!--     778x350 -->
+    <div id="slider1_container" style="position: relative; width: 450px; height: 202px; overflow: hidden;">
+        <!-- Slides Container -->
+        <div u="slides" style="cursor: move; position: absolute; width: 450px; height: 202px; top: 0px;
+            left: 0px; overflow: hidden;">
+            <div><a u="image" href="/webcam/webcam.jpg" target="_blank"><img src2="/webcam/webcam_panorama.jpg" /></a></div>
+            <div><a u="image" href="/webcam/webcam-1.jpg" target="_blank"><img src2="/webcam/webcam_panorama-1.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-2.jpg" target="_blank"><img src2="/webcam/webcam_panorama-2.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-3.jpg" target="_blank"><img src2="/webcam/webcam_panorama-3.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-4.jpg" target="_blank"><img src2="/webcam/webcam_panorama-4.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-5.jpg" target="_blank"><img src2="/webcam/webcam_panorama-5.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-6.jpg" target="_blank"><img src2="/webcam/webcam_panorama-6.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-7.jpg" target="_blank"><img src2="/webcam/webcam_panorama-7.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-8.jpg" target="_blank"><img src2="/webcam/webcam_panorama-8.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-9.jpg" target="_blank"><img src2="/webcam/webcam_panorama-9.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-10.jpg" target="_blank"><img src2="/webcam/webcam_panorama-10.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-11.jpg" target="_blank"><img src2="/webcam/webcam_panorama-11.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-12.jpg" target="_blank"><img src2="/webcam/webcam_panorama-12.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-13.jpg" target="_blank"><img src2="/webcam/webcam_panorama-13.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-14.jpg" target="_blank"><img src2="/webcam/webcam_panorama-14.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-15.jpg" target="_blank"><img src2="/webcam/webcam_panorama-15.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-16.jpg" target="_blank"><img src2="/webcam/webcam_panorama-16.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-17.jpg" target="_blank"><img src2="/webcam/webcam_panorama-17.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-18.jpg" target="_blank"><img src2="/webcam/webcam_panorama-18.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-19.jpg" target="_blank"><img src2="/webcam/webcam_panorama-19.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-20.jpg" target="_blank"><img src2="/webcam/webcam_panorama-20.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-21.jpg" target="_blank"><img src2="/webcam/webcam_panorama-21.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-22.jpg" target="_blank"><img src2="/webcam/webcam_panorama-22.jpg" /></a></div>
+            <div><a u="image" href="webcam/webcam-23.jpg" target="_blank"><img src2="/webcam/webcam_panorama-23.jpg" /></a></div>
+        </div>
+        <!-- Direction Navigator Skin Begin -->
+        <style>
+            /* jssor slider direction navigator skin 20 css */
+            /*
+            .jssord20l              (normal)
+            .jssord20r              (normal)
+            .jssord20l:hover        (normal mouseover)
+            .jssord20r:hover        (normal mouseover)
+            .jssord20ldn            (mousedown)
+            .jssord20rdn            (mousedown)
+            */
+            .jssord20l, .jssord20r, .jssord20ldn, .jssord20rdn
+            {
+            	position: absolute;
+            	cursor: pointer;
+            	display: block;
+                background: url(/static/d20.png) no-repeat;
+                overflow:hidden;
+            }
+            .jssord20l { background-position: -3px -33px; }
+            .jssord20r { background-position: -63px -33px; }
+            .jssord20l:hover { background-position: -123px -33px; }
+            .jssord20r:hover { background-position: -183px -33px; }
+            .jssord20ldn { background-position: -243px -33px; }
+            .jssord20rdn { background-position: -303px -33px; }
+        </style>
+        <!-- Arrow Left -->
+        <span u="arrowleft" class="jssord20l" style="width: 55px; height: 55px; top: 123px; left: 8px;">
+        </span>
+        <!-- Arrow Right -->
+        <span u="arrowright" class="jssord20r" style="width: 55px; height: 55px; top: 123px; right: 8px">
+        </span>
+        <!-- Direction Navigator Skin End -->
+        <a style="display: none" href="http://www.jssor.com">Responsive Slider</a>
+    </div>
+    <!-- Jssor Slider End -->
+<!-- 
     <div class="webcam">
         <a href="webcam/webcam.jpg" target="_blank"><img class="cam" src="webcam/webcam_panorama.jpg" /></a>
     </div>
+ -->
 </div>
 
 <div id="temperature" class="datenblock">
 <h2>Temperatur</h2>
 <div class="topright">
-<select onchange="show(1, this.value);" id="select1" class="selection">
-    <option value="1">Letzten 60 Minuten</option>
-    <option value="2">Letzten 24 Stunden</option>
-    <option value="3">Letzte Woche</option>
-    <option value="4">Letzter Monat</option>
-    <option value="5">Letztes Quartal</option>
-    <option value="6">Letztes Jahr</option>        
-    <option value="7">Alle Daten</option>        
-</select>
+    <select onchange="show(1, this.value);" id="select1" class="selection">
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>          
+    </select>
 </div>
     <div class="picture">
 
@@ -181,13 +299,14 @@ Alle Daten
 <h2>Feuchtigkeit</h2>
 <div class="topright">
     <select onchange="show(2, this.value);" id="select2" class="selection">
-        <option value="1">Letzten 60 Minuten</option>
-        <option value="2">Letzten 24 Stunden</option>
-        <option value="3">Letzte Woche</option>
-        <option value="4">Letzter Monat</option>
-        <option value="5">Letztes Quartal</option>
-        <option value="6">Letztes Jahr</option>        
-        <option value="7">Alle Daten</option>        
+            <option value="1">Letzten 60 Minuten</option>
+            <option value="2">Letzten 24 Stunden</option>
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>            
     </select>
 </div>
     <div class="picture">
@@ -204,11 +323,12 @@ Alle Daten
         <select id="select3" onchange="show(3, this.value);" class="selection">
             <option value="1">Letzten 60 Minuten</option>
             <option value="2">Letzten 24 Stunden</option>
-            <option value="3">Letzte Woche</option>
-            <option value="4">Letzter Monat</option>
-            <option value="5">Letztes Quartal</option>
-            <option value="6">Letztes Jahr</option>        
-            <option value="7">Alle Daten</option>        
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>           
         </select>
     </div>
     <div class="picture">
@@ -224,11 +344,12 @@ Alle Daten
         <select id="select4" onchange="show(4, this.value);" class="selection">
             <option value="1">Letzten 60 Minuten</option>
             <option value="2">Letzten 24 Stunden</option>
-            <option value="3">Letzte Woche</option>
-            <option value="4">Letzter Monat</option>
-            <option value="5">Letztes Quartal</option>
-            <option value="6">Letztes Jahr</option>        
-            <option value="7">Alle Daten</option>        
+            <option value="3">Letzten 72 Stunden</option>
+            <option value="4">Letzte Woche</option>
+            <option value="5">Letzter Monat</option>
+            <option value="6">Letztes Quartal</option>
+            <option value="7">Letztes Jahr</option>        
+            <option value="8">Alle Daten</option>        
         </select>
     </div>
     <div class="picture">
@@ -243,7 +364,7 @@ Alle Daten
 </div>
 
 <div id="footer">
-Dies ist die D<sup>3</sup>-Wetterstation. Aktueller Standort ist in Düsseldorf-Gerresheim. Die oben genannten Werte werden seit dem 31.3.2014 systematisch erfasst.
+Dies ist die D<sup>3</sup> Wetterstation. Aktueller Standort ist in Düsseldorf-Gerresheim. Die oben genannten Werte werden seit dem 02.04.2014 systematisch erfasst.
 
 Die folgenden Sensoren kommen dabei zum Einsatz: TSL2561 (Helligkeit), BMP180 (Temperatur und Luftdruck für Server und Außen), ASH-2200 (Temperatur und Luftfeuchtigkeit; über USB-WDE1).
 </div>

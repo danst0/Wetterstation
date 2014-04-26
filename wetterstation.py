@@ -10,7 +10,7 @@ Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung pe
 import pdb
 import sys
 import os
-# import __main__
+import __main__
 import datetime
 from pprint import pprint
 
@@ -172,6 +172,7 @@ class Sensoren:
         current_section = ''
         previous_line = ''
         first_occurence = True
+        first_special_occurence = 3
         neue_zeilen = ''
         daten_ohne_none = {}
         special_data = {}
@@ -188,6 +189,7 @@ class Sensoren:
                 if abschnitt not in special_data[raum].keys():
                     special_data[raum][abschnitt] = {}
                 if tmp['durchschnitt'] != None:  
+#                     pdb.set_trace()
                     special_data[raum][abschnitt]['Durchschnitt'] = str(int(tmp['durchschnitt']))
                     special_data[raum][abschnitt]['Minimum'] = str(int(tmp['min']))
                     special_data[raum][abschnitt]['Maximum'] = str(int(tmp['max']))
@@ -195,8 +197,10 @@ class Sensoren:
                     special_data[raum][abschnitt]['Durchschnitt'] = '--'
                     special_data[raum][abschnitt]['Minimum'] = '--'
                     special_data[raum][abschnitt]['Maximum'] = '--'
+#                 pprint(special_data)
                 
 #         pprint(daten_ohne_none)
+#         pdb.set_trace()
         for line in lines:
 #             print line,
             special_value = None
@@ -208,8 +212,10 @@ class Sensoren:
                 special_value = 'Maximum'
             if special_value != None:
                 if current_section == 'Temperatur':
-                    if first_occurence:
+                    if first_special_occurence > 0:
                         line = ' ' *12 + special_data[u'Raum1'][current_section][special_value]
+                        first_special_occurence -= 1
+#                         print first_special_occurence
                     else:
                         line = ' ' *12 + special_data[u'Außen'][current_section][special_value]
                 elif current_section == 'Luftdruck':
@@ -238,6 +244,7 @@ class Sensoren:
             if line.find('Temperatur') != -1:
                 current_section = 'Temperatur'
                 first_occurence = True
+#                 first_special_occurence = True
             elif line.find('Luftdruck') != -1:
                 current_section = 'Luftdruck'
             elif line.find('Feuchtigkeit') != -1:
@@ -253,18 +260,14 @@ class Sensoren:
             file_handle.write(neue_zeilen)
         file_handle.close()
 
-# def isOnlyInstance():
-#     # Determine if there are more than the current instance of the application
-#     # running at the current time.
-#     return os.system("(( $(ps -ef | grep python | grep '[" +
-#                      __main__.__file__[0] + "]" + __main__.__file__[1:] +
-#                      "' | wc -l) > 1 ))") != 0
+def isOnlyInstance():
+    # Determine if there are more than the current instance of the application
+    # running at the current time.
+    return os.system("(( $(ps -ef | grep python | grep '[" +
+                     __main__.__file__[0] + "]" + __main__.__file__[1:] +
+                     "' | wc -l) > 1 ))") != 0
 
 if __name__ == '__main__':
-    
-#     if not isOnlyInstance():
-#         print 'Es kann nur eine Instanz der Wetterstation laufen.'
-#         sys.exit()
     
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
@@ -277,17 +280,7 @@ if __name__ == '__main__':
     ARGS = PARSER.parse_args()
 #     print(args)
     print "Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y')
-# Basisobjekte
-    D = D3.datenbank.Database()
-    S = Sensoren()
-# Update Database?
-    if ARGS.aktualisieren:
-        S.sensoren_auslesen()
-        D.add_all(S.daten, ARGS.alleerlauben)
-#         d.add('Server', 'Temperatur', random.random()*30)
-        D.con.commit()
-#         print(d.get_latest('Server', 'Temperatur'))
-        S.write_to_file(D)
+
     if ARGS.kamera:
         print('Aufnahme Kamerabild')
         c = Camera()
@@ -296,10 +289,26 @@ if __name__ == '__main__':
             c.download_picture()
         else:
             c.alternative_picture()
+    if not isOnlyInstance():
+        print 'Es kann nur eine Instanz der Wetterstation laufen.'
+        sys.exit(1)
+
+# Basisobjekte
+    D = D3.datenbank.Database()
+    S = Sensoren()
+# Update Database?
+    if ARGS.aktualisieren:
+        S.sensoren_auslesen()
+        D.add_all(S.daten, ARGS.alleerlauben)
+#         d.add('Server', 'Temperatur', random.random()*30)
+        D.commit()
+#         print(d.get_latest('Server', 'Temperatur'))
+        S.write_to_file(D)
+
     if ARGS.diagramme:
 # Generate Graphs
         G = D3.diagramme.Graphs(D, D3.config.FULL_BASE_PATH, ARGS.erststart)
         G.generate_graphs()
         G.close()
 #     print("Beende Wetterstation")
-
+    D.close()

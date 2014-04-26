@@ -8,6 +8,8 @@ import D3.config
 import datetime
 import sys
 import re
+import os
+import __main__
 
 def parse_line(raw):
 # #$1;1;;
@@ -43,7 +45,17 @@ def parse_line(raw):
     values[20] = True if values[20] == "1" else False
     return values
 
+def isOnlyInstance():
+    # Determine if there are more than the current instance of the application
+    # running at the current time.
+    return os.system("(( $(ps -ef | grep python | grep '[" +
+                     __main__.__file__[0] + "]" + __main__.__file__[1:] +
+                     "' | wc -l) > 1 ))") != 0
+
 if __name__ == '__main__':
+    if not isOnlyInstance():
+        print 'Es kann nur eine Instanz von wde.py laufen.'
+        sys.exit()
     com_port = '/dev/ttyUSB0'
     ports = map(lambda x: x[0], comports())
     if not com_port in ports:
@@ -51,23 +63,35 @@ if __name__ == '__main__':
         print('Vorhandene Ports: ' + ', '.join(ports))
         sys.exit(1)
     try:
-        serial = serial.Serial(com_port, baudrate=9600, timeout=90)
+        serial = serial.Serial(com_port, baudrate=9600, timeout=180)
     except:
         print 'Serielle Schnittstelle lässt sich nicht ansprechen'
         sys.exit(1)
-    string = serial.readline()
+    string = ''
+    try:
+        string = serial.readline()
+    except:
+        pass
 #     string = '$1;1;;;9,1;;;;;;;;55;;;;;;;;;;;;0\r\n'
+    found = False
     while True:
         val = parse_line(string)
         if val == None:
             print 'Keine Daten in den letzten', serial.timeout, 'Sekunden empfangen oder nicht korrekt',
             print string
         else:
+            found = True
             break
 #         break
-        string = serial.readline()
+        try:
+            string = serial.readline()
+        except:
+            print 'Keine Daten empfangen'    
+        
 #     print string
 #     print val
+    if found:
+        print 'Neue Daten empfangen und gespeichert'
     val.append(datetime.datetime.now())
     pickle.dump(val, open(D3.config.FULL_BASE_PATH + 'wde.pickle', 'wb'))
     serial.close()

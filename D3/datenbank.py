@@ -7,9 +7,10 @@ from pprint import pprint
 import random
 import config
 import math
+import copy
 
 class Database:
-    maximum_deviation = {'Feuchtigkeit': 0.15, 'Licht': 999999.0, 'Temperatur': 0.3, 'Luftdruck': 0.2}
+    maximum_deviation = {'Feuchtigkeit': 1.2, 'Licht': 5.0, 'Temperatur': 1.3, 'Luftdruck': 1.2}
     file = config.FULL_BASE_PATH + 'wetter.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
@@ -17,6 +18,7 @@ class Database:
         self.cur = self.con.cursor()
         if not self.check_database():
             self.generate_tables()
+        self.history = {}
 
             
     def generate_tables(self):
@@ -50,13 +52,25 @@ class Database:
     #         print 'INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert)
             self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?, ?)', (now, config.ORT, raum, art, wert))
         else:
-            print 'Wert wurde nicht in die Datenbank eingetragen, da die Abweichung zum letzten Wert zu groß ist.'
-            print 'Raum', raum, 'Art', art, 'aktueller Wert', wert
-            print 'Alter Wert', old_value
+            print 'Wert wurde nicht in die Datenbank eingetragen, da die Abweichung zum letzten Wert zu gross ist.'
+            print 'Raum {}, Art {}; aktueller Wert {}; alter Wert {}'.format(unicode(raum,'utf8'), art, wert, old_value)
+#             print 'Alter Wert', old_value
     
     def choose(self, von, bis, raum, art, ort=config.ORT, special_values=False):
-        self.cur.execute('SELECT * FROM weather WHERE ort=? AND raum=? AND art=? ORDER BY datum ASC', (ort, raum, art))
-        liste = filter(lambda x: x[0]<bis and x[0]>=von, self.cur.fetchall())
+#         start_time = time.clock()
+#         data_string = str(von)+str(bis)+raum+art+ort
+#         print data_string
+#         if not data_string in self.history.keys():
+#         print von
+
+        self.cur.execute('SELECT * FROM weather WHERE datum > ? AND datum <= ? AND ort=? AND raum=? AND art=? ORDER BY datum ASC', (von, bis, ort, raum, art))
+        tmp = self.cur.fetchall()
+#         self.history[data_string] = copy.deepcopy(tmp)
+#         else:
+#             tmp = self.history[data_string]
+#             del(self.history[data_string])
+        liste = tmp
+#         liste = filter(lambda x: x[0]<bis and x[0]>=von, tmp)
         # Alle None-Werte aus den Daten entfernen
         liste = filter(lambda x: x[4] != None, liste)
 #         pprint(liste)
@@ -73,6 +87,8 @@ class Database:
             maximum_wert = None
             minimum_wert = None
             durchschnitt_wert = None
+#         elapsed_time = time.clock() - start_time
+#         print "Time elapsed: {} seconds".format(elapsed_time)            
         return {'roh': liste, 'min': minimum_wert, 'max': maximum_wert, 'durchschnitt': durchschnitt_wert}
 
     def get_distinct_raum(self):
@@ -85,6 +101,8 @@ class Database:
 #         print tmp
         return map(lambda x: x[0], tmp)
 
+    def commit(self):
+        self.con.commit()
     
     def get_latest(self, raum, art):
         self.cur.execute('SELECT * FROM weather WHERE raum=? AND art=? ORDER by datum DESC', (raum, art))
