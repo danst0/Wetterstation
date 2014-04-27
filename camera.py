@@ -5,23 +5,45 @@ import subprocess
 import argparse
 import os
 import D3.pipan
+import D3.config
 import shutil
+import pickle
 
 local_path = '/home/danst/Wetterstation/'
 raspistill = '/opt/vc/bin/raspistill'
 convert = '/usr/bin/convert'
 class Camera:
-    def __init__(self, rotation=180):
+    def __init__(self, rotation=0):
         self.rotation = rotation
-        self.servos = D3.pipan.PiPan() 
+        self.servos = D3.pipan.PiPan(smooth=True) 
         self.start_cam_x = 40
-        self.max_cam_x = 180
+        self.max_cam_x = 200
         self.start_cam_y = 140
         self.max_cam_y = 140
-        
+        cam_pos_one_way = [
+                        (40, 130),
+                        (40, 150),
+                        (85, 150),
+                        (85, 130),                        
+                        (120, 130),
+                        (120, 150),
+                        (160, 130),
+                        (195, 130),
+                        (215, 130),
+                        (240, 110),
+                        (240, 200)]
+        self.cam_pos = cam_pos_one_way[1:-1] + list(reversed(cam_pos_one_way))
+        try:
+            self.cam_pos_counter = pickle.load(open(D3.config.FULL_BASE_PATH + 'cam_pos.pickle', 'rb'))
+        except:
+            self.cam_pos_counter = 0
+        self.last_pos_x = self.cam_pos[self.cam_pos_counter][0]
+        self.last_pos_y = self.cam_pos[self.cam_pos_counter][1]
+
     
     def take_picture(self, light=False):
         if not light:
+            self.move_next()
             print('Schiesse Foto')
         image_raw = local_path + 'webcamraw.jpg'
         image = local_path + 'webcam.jpg'
@@ -29,7 +51,7 @@ class Camera:
         image_pan_select = local_path + 'webcam_pan.jpg'
         image_pan_orig = local_path + 'webcam_pan_orig.jpg'
         image_pan_final = local_path + 'webcam_panorama.jpg'
-        command = [raspistill, '-o', image_raw, '-t', '1']
+        command = [raspistill, '-o', image_raw, '--rotation', '180', '-t', '0']
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         if light:
             command = [convert, image_raw, '-rotate', str(self.rotation), image]
@@ -98,7 +120,7 @@ class Camera:
         self.servos.do_pan (self.start_cam_x)
 #         for tilt in xrange(self.start_cam_y, self.max_cam_x, 20):
 #             p.do_tilt (int(tilt))
-        for pan in xrange(self.start_cam_x, self.max_cam_x, 40):
+        for pan in xrange(self.start_cam_x, self.max_cam_x, 50):
             self.servos.do_pan(int(pan))
             self.take_picture(light=True)
             self.move_picture()
@@ -108,14 +130,27 @@ class Camera:
             filename = local_path + 'pano' + str(counter) + '.jpg'
             if os.path.isfile(filename):
                 img_list.append(filename)
-                
-        command = [convert, img_list, '-normalize', '-rotate', str(self.rotation), '+append', image]
+#                 '-normalize', '-rotate', str(self.rotation), 
+        command = [convert] + img_list + ['+append', local_path + 'webcam.jpg']
+        print command
         try:
             output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, e:
             print 'Fehler bei der Zusammenfügung der Bilder', e.returncode
             print e.output
             return False
+        self.delete_pano()
+
+    def move_next(self):
+        self.last_pos_x = self.cam_pos[self.cam_pos_counter][0]
+        self.last_pos_y = self.cam_pos[self.cam_pos_counter][1]
+        self.cam_pos_counter += 1
+        if self.cam_pos_counter >= len(self.cam_pos):
+            self.cam_pos_counter = 0
+        self.servos.do_pan(self.cam_pos[self.cam_pos_counter][0], self.last_pos_x)
+        self.servos.do_tilt(self.cam_pos[self.cam_pos_counter][1], self.last_pos_y)
+        pickle.dump(self.cam_pos_counter, open(D3.config.FULL_BASE_PATH + 'cam_pos.pickle', 'wb'))
+
 
 if __name__ == "__main__":
     c = Camera()
@@ -126,6 +161,10 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 #     print(args)
+#     while True:
+#         c.move_next()
+#         print c.cam_pos_counter, c.cam_pos[c.cam_pos_counter]
+#         raw_input()
     if args.picture:
         c.take_picture()
     if args.fullpanorama:
