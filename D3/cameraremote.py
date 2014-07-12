@@ -74,6 +74,7 @@ class Camera:
         command = ['/usr/bin/ssh', self.remote_user+'@'+self.camera_ip, self.remote_folder+'camera.py', '--picture']
         tmp = self.sshexec(command)
         return tmp
+
     def alternative_picture(self):
         shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+self.name_small_file)
         shutil.copyfile(self.local_folder+'webcam_icon.jpg', self.local_folder+self.name_large_file)    
