@@ -27,6 +27,7 @@ from D3.TSL2561 import TSL2561
 import pickle
 
 
+
 class Sensoren:
     """
     Klasse zum Auslesen der Sensoren über I2C und serieller Schnittstelle.
@@ -39,29 +40,29 @@ class Sensoren:
 
         
         if not self.read_radio():
-            print('Problem mit dem Empfänger')
+            D3.config.logging.warning('Problem mit dem Empfänger')
             sys.exit(1)
         if not self.read_i2c():
-            print('Problem mit I2C-Bus')
+            D3.config.logging.warning('Problem mit I2C-Bus')
             sys.exit(1)
 
 
         
         
     def read_radio(self):
-        print 'Funksensor auslesen'
+        D3.config.logging.info('Funksensor auslesen')
         try:
             fields = pickle.load(open(D3.config.FULL_BASE_PATH + 'wde.pickle', 'rb'))
         except:
             fields = []
-#         print fiel         
+#         D3.config.logging.debug(fiel)
         #string = '$1;1;;;;;;13,0;;;;;;;;58;;;;18,9;39;0,0;2680;0;0'
             # should be exception
 #         fields = string.split(';')
-#         print len(fields)
+#         D3.config.logging.debug(len(fields))
 #         pprint(fields[-1])
         if len(fields) > 0 and fields[-1] > datetime.datetime.now()-datetime.timedelta(hours=1):
-#             print 'Go'
+#             D3.config.logging('Go')
             self.daten['Raum1']['Temperatur'] = fields[1]
             self.daten['Raum1']['Feuchtigkeit'] = fields[9]
             self.daten['Raum2']['Temperatur'] = None #float(fields[19].replace(',', '.'))
@@ -71,7 +72,7 @@ class Sensoren:
             return False
 
     def read_i2c(self):
-        print 'Lokale I2C-Sensoren auslesen'
+        D3.config.logging.info('Lokale I2C-Sensoren auslesen')
         # Interner Sensor
 #         bmp = BMP085(0x77, bus=1)
 
@@ -102,13 +103,13 @@ class Sensoren:
         # enter 102350 since we include two decimal places in the integer value
         # altitude = bmp.readAltitude(102350)
 
-#         print "Temperature: %.2f C" % server_temp
-#         print "Pressure:    %.2f hPa" % (server_druck / 100.0)
-#         print server_temp
-#         print server_druck / 100.0
+#         D3.config.logging.debug("Temperature: %.2f C" % server_temp)
+#         D3.config.logging.debug("Pressure:    %.2f hPa" % (server_druck / 100.0))
+#         D3.config.logging.debug(server_temp)
+#         D3.config.logging.debug(server_druck / 100.0)
 
         aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
-#         print aussen_bmp.available()
+#         D3.config.logging.debug(aussen_bmp.available())
         if aussen_bmp.available():
 
             aussen_temp = 0
@@ -122,11 +123,11 @@ class Sensoren:
                 aussen_druck += aussen_bmp.readPressure()
             aussen_druck = aussen_druck/3.0/100.0
 
-#             print "Temperature: %.2f C" % aussen_temp
-#             print "Pressure:    %.2f hPa" % (aussen_druck / 100.0)
+#             D3.config.logging.debug("Temperature: %.2f C" % aussen_temp)
+#             D3.config.logging.debug("Pressure:    %.2f hPa" % (aussen_druck / 100.0))
 
             tsl = TSL2561()
-    #         print tsl.available()
+    #         D3.config.logging.debug(tsl.available())
             licht = 0.0
             counter = 0.0
             for i in range(5):
@@ -137,9 +138,9 @@ class Sensoren:
                 time.sleep(1.2)
             if counter != 0:
                 licht = licht / float(counter)
-#             print licht
+#             D3.config.logging.debug(licht)
             if licht == 0:
-                print 'Licht war null!'
+                D3.config.logging.warning('Licht war null!')
     #         licht += 1
 
         else:
@@ -202,7 +203,7 @@ class Sensoren:
 #         pprint(daten_ohne_none)
 #         pdb.set_trace()
         for line in lines:
-#             print line,
+#             D3.config.logging.debug(line)
             special_value = None
             if previous_line.find('durchschnitt') != -1:
                 special_value = 'Durchschnitt'
@@ -268,7 +269,7 @@ def isOnlyInstance():
                      "' | wc -l) > 1 ))") != 0
 
 if __name__ == '__main__':
-    
+
     PARSER = argparse.ArgumentParser(description='Wetterstation')
     PARSER.add_argument('--aktualisieren', action='store_true', help='Aktualisiert die Datenbank mit den neuesten Werten')
     PARSER.add_argument('--alleerlauben', action='store_true', help='Erlaube alles Werte, ohne auf interne Grenzen zu achten')
@@ -279,18 +280,26 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 #     print(args)
-    print "Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y')
-
+    text = ''
+    if ARGS.aktualisieren:
+        text += 'AKT'
+    if ARGS.diagramme:
+        text += 'DIA'
     if ARGS.kamera:
-        print('Aufnahme Kamerabild')
+        text += 'CAM'
+    D3.config.init_logging(text)
+    D3.config.logging.info("Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y'))
+#     D3.config.logging.info('Befehlszeile; aktualisieren: {}, diagramme: {}, kamera: {}'.format(ARGS.aktualisieren, ARGS.diagramme, ARGS.kamera))
+    if ARGS.kamera:
+        D3.config.logging.info('Aufnahme Kamerabild')
         c = Camera()
         if c.take_picture():
-            print('Kamerabild herunterladen')        
+            D3.config.logging.info('Kamerabild herunterladen')        
             c.download_picture()
         else:
             c.alternative_picture()
     if not isOnlyInstance():
-        print 'Es kann nur eine Instanz der Wetterstation laufen.'
+        D3.config.logging.warn('Es kann nur eine Instanz der Wetterstation laufen.')
         sys.exit(1)
 
 # Basisobjekte

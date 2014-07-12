@@ -24,7 +24,8 @@ class Camera:
     def rotate_pictures(self):
         basename_small = self.name_small_file[:self.name_small_file.rfind('.')]
         basename_large = self.name_large_file[:self.name_large_file.rfind('.')]
-        print basename_small, basename_large
+        D3.config.logging.debug(basename_small)
+        D3.config.logging.debug(basename_large)
 #         pdb.set_trace()
         for filename in [{'base':basename_small, 'all': self.name_small_file},{'base':basename_large, 'all': self.name_large_file}]:
             for i in range(22,0,-1):
@@ -48,7 +49,7 @@ class Camera:
         try:
             p = subprocess.check_call(command, stdin=None, stdout=None, stderr=None)
         except subprocess.CalledProcessError as e:
-            print e
+            D3.config.logging.error(e)
             success = False
         return success
         

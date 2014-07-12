@@ -33,15 +33,16 @@ class Graphs:
             try:
                 self.last_generation = pickle.load(open(D3.config.FULL_BASE_PATH + 'data.pickle', 'rb'))
             except:
-                self.last_generation = {}                
-        self.generation_limits = {  'Alles':        2*10*24*60*60,
-                                    '1 Jahr':       2*6*24*60*60,
-                                    '1 Quartal':    2*48*60*60,
-                                    '30 Tage':      2*12*60*60,
-                                    '7 Tage':       2*3*60*60,
-                                    '72 Stunden':   2*1.5*60*60,
-                                    '24 Stunden':   2*30*60,
-                                    '1 Stunde':     2*3*60}
+                self.last_generation = {}            
+        factor = 1 
+        self.generation_limits = {  'Alles':        factor*10*24*60*60,
+                                    '1 Jahr':       factor*6*24*60*60,
+                                    '1 Quartal':    factor*48*60*60,
+                                    '30 Tage':      factor*12*60*60,
+                                    '7 Tage':       factor*3*60*60,
+                                    '72 Stunden':   factor*1.5*60*60,
+                                    '24 Stunden':   factor*30*60,
+                                    '1 Stunde':     factor*3*60}
         self.diagramm_counter = 0
     def close(self):
         pickle.dump(self.last_generation, open(D3.config.FULL_BASE_PATH + 'data.pickle', 'wb'))
@@ -297,7 +298,7 @@ class Graphs:
 
 
         else:
-            print dauer
+            D3.config.logging.warning(dauer)
             neue_daten = copy.deepcopy(daten)            
 
                 
@@ -384,7 +385,7 @@ class Graphs:
         else:
             plt.legend(loc='upper left')
         pfad = self.full_base_path + 'html/diagramme/' + u'Raeume' + '_' + ''.join(arten) + '_' + basename + '.png'
-        print pfad
+        D3.config.logging.info(pfad)
         fig.savefig(pfad)
         plt.close()
         self.diagramm_counter += 1
@@ -431,7 +432,7 @@ class Graphs:
 #         print d.get_distinct_art()
         nur_datum = '%d.%m.%y'
         datum_tag = '%a, %d.'
-        print 'Generiere Diagramme'
+        D3.config.logging.info('Generiere Diagramme')
 #         print self.d.get_distinct_art()
         for art in self.d.get_distinct_art():
 #             print art
@@ -461,6 +462,6 @@ class Graphs:
                     self.aggregate_graph(datetime.datetime.now() - datetime.timedelta(hours=1), datetime.datetime.now(), self.d.get_distinct_raum(), (art,), '1 Stunde', '%H:%M', groesse=size, hd=details)
 
         if self.diagramm_counter != 1:
-            print self.diagramm_counter, 'Diagramme generiert'
+            D3.config.logging.info('{} Diagramme generiert'.format(self.diagramm_counter))
         else:
-            print self.diagramm_counter, 'Diagramm generiert'
+            D3.config.logging.info('{} Diagramm generiert'.format(self.diagramm_counter))

@@ -2,6 +2,7 @@
 
 import time
 from Adafruit_I2C import Adafruit_I2C
+import D3.config
 
 # ===========================================================================
 # BMP085 Class
@@ -63,7 +64,7 @@ class BMP085 :
     # Make sure the specified mode is in the appropriate range
     if ((mode < 0) | (mode > 3)):
       if (self.debug):
-        print "Invalid Mode: Using STANDARD by default"
+        D3.config.logging.debug( "Invalid Mode: Using STANDARD by default")
       self.mode = self.__BMP085_STANDARD
     else:
       self.mode = mode
@@ -101,17 +102,17 @@ class BMP085 :
 
   def showCalibrationData(self):
       "Displays the calibration values for debugging purposes"
-      print "DBG: AC1 = %6d" % (self._cal_AC1)
-      print "DBG: AC2 = %6d" % (self._cal_AC2)
-      print "DBG: AC3 = %6d" % (self._cal_AC3)
-      print "DBG: AC4 = %6d" % (self._cal_AC4)
-      print "DBG: AC5 = %6d" % (self._cal_AC5)
-      print "DBG: AC6 = %6d" % (self._cal_AC6)
-      print "DBG: B1  = %6d" % (self._cal_B1)
-      print "DBG: B2  = %6d" % (self._cal_B2)
-      print "DBG: MB  = %6d" % (self._cal_MB)
-      print "DBG: MC  = %6d" % (self._cal_MC)
-      print "DBG: MD  = %6d" % (self._cal_MD)
+      D3.config.logging.debug("DBG: AC1 = %6d" % (self._cal_AC1))
+      D3.config.logging.debug("DBG: AC2 = %6d" % (self._cal_AC2))
+      D3.config.logging.debug("DBG: AC3 = %6d" % (self._cal_AC3))
+      D3.config.logging.debug("DBG: AC4 = %6d" % (self._cal_AC4))
+      D3.config.logging.debug("DBG: AC5 = %6d" % (self._cal_AC5))
+      D3.config.logging.debug("DBG: AC6 = %6d" % (self._cal_AC6))
+      D3.config.logging.debug("DBG: B1  = %6d" % (self._cal_B1))
+      D3.config.logging.debug("DBG: B2  = %6d" % (self._cal_B2))
+      D3.config.logging.debug("DBG: MB  = %6d" % (self._cal_MB))
+      D3.config.logging.debug("DBG: MC  = %6d" % (self._cal_MC))
+      D3.config.logging.debug("DBG: MD  = %6d" % (self._cal_MD))
 
   def readRawTemp(self):
     "Reads the raw (uncompensated) temperature from the sensor"
@@ -123,7 +124,7 @@ class BMP085 :
         time.sleep(0.005)  # Wait 5ms
         raw = self.readU16(self.__BMP085_TEMPDATA)
         if (self.debug):
-          print "DBG: Raw Temp: 0x%04X (%d)" % (raw & 0xFFFF, raw)
+          D3.config.logging.debug("DBG: Raw Temp: 0x%04X (%d)" % (raw & 0xFFFF, raw))
         return raw
     else:
         return None
@@ -144,7 +145,7 @@ class BMP085 :
     xlsb = self.i2c.readU8(self.__BMP085_PRESSUREDATA+2)
     raw = ((msb << 16) + (lsb << 8) + xlsb) >> (8 - self.mode)
     if (self.debug):
-      print "DBG: Raw Pressure: 0x%04X (%d)" % (raw & 0xFFFF, raw)
+      D3.config.logging.debug("DBG: Raw Pressure: 0x%04X (%d)" % (raw & 0xFFFF, raw))
     return raw
 
   def readTemperature(self):
@@ -162,7 +163,7 @@ class BMP085 :
     B5 = X1 + X2
     temp = ((B5 + 8) >> 4) / 10.0
     if (self.debug):
-      print "DBG: Calibrated temperature = %f C" % temp
+      D3.config.logging.debug("DBG: Calibrated temperature = %f C" % temp)
     return temp
 
   def readPressure(self):
@@ -209,10 +210,9 @@ class BMP085 :
     X2 = (self._cal_MC << 11) / (X1 + self._cal_MD)
     B5 = X1 + X2
     if (self.debug):
-      print "DBG: X1 = %d" % (X1)
-      print "DBG: X2 = %d" % (X2)
-      print "DBG: B5 = %d" % (B5)
-      print "DBG: True Temperature = %.2f C" % (((B5 + 8) >> 4) / 10.0)
+      D3.config.logging.debug("DBG: X1 = %d" % (X1))
+      D3.config.logging.debug("DBG: X2 = %d" % (X2))
+      D3.config.logging.debug("DBG: True Temperature = %.2f C" % (((B5 + 8) >> 4) / 10.0))
 
     # Pressure Calculations
     B6 = B5 - 4000

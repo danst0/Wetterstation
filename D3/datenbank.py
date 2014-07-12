@@ -5,13 +5,13 @@ import sqlite3
 import time, datetime
 from pprint import pprint
 import random
-import config
 import math
 import copy
+import D3.config
 
 class Database:
-    maximum_deviation = {'Feuchtigkeit': 1.2, 'Licht': 5.0, 'Temperatur': 1.3, 'Luftdruck': 1.2}
-    file = config.FULL_BASE_PATH + 'wetter.sqlite3'
+    maximum_deviation = {'Feuchtigkeit': 1.2, 'Licht': 11.0, 'Temperatur': 1.3, 'Luftdruck': 1.2}
+    file = D3.config.FULL_BASE_PATH + 'wetter.sqlite3'
     def __init__(self):
         self.con = sqlite3.connect(self.file, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
 #         self.con.text_factory = str
@@ -47,16 +47,18 @@ class Database:
             old_value == 0 or \
             abs((wert/old_value)-1) <= self.maximum_deviation[art]:
             if wert == 0:
-                print 'zero value'        
-                print 'now adding', (now, config.ORT, raum, art, wert)
+                D3.config.logging.warning('zero value')
+                D3.config.logging.warning('now adding ' + str((now, config.ORT, raum, art, wert)))
     #         print 'INSERT INTO weather VALUES (?, ?, ?, ?)', (now, raum, art, wert)
-            self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?, ?)', (now, config.ORT, raum, art, wert))
+            self.cur.execute('INSERT INTO weather VALUES (?, ?, ?, ?, ?)', (now, D3.config.ORT, raum, art, wert))
         else:
-            print 'Wert wurde nicht in die Datenbank eingetragen, da die Abweichung zum letzten Wert zu gross ist.'
-            print 'Raum {}, Art {}; aktueller Wert {}; alter Wert {}'.format(unicode(raum,'utf8'), art, wert, old_value)
+            D3.config.logging.warning('Wert wurde nicht in die Datenbank eingetragen, da die Abweichung zum letzten Wert zu gross ist.')
+#             print type(raum), type(art), type(wert), type(old_value)
+            D3.config.logging.warning(str((raum, art, wert, old_value)))
+            D3.config.logging.warning(u'Raum {}, Art {}; aktueller Wert {}; alter Wert {}'.format(raum, art, wert, old_value))
 #             print 'Alter Wert', old_value
     
-    def choose(self, von, bis, raum, art, ort=config.ORT, special_values=False):
+    def choose(self, von, bis, raum, art, ort=D3.config.ORT, special_values=False):
 #         start_time = time.clock()
 #         data_string = str(von)+str(bis)+raum+art+ort
 #         print data_string

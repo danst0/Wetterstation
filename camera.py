@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import os
 
+
 local_path = '/home/danst/Wetterstation/'
 raspistill = '/opt/vc/bin/raspistill'
 convert = '/usr/bin/convert'

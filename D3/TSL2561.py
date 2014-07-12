@@ -6,7 +6,7 @@ import sys
 import smbus
 import time
 from Adafruit_I2C import Adafruit_I2C
-
+import D3.config
 
 ### Written for Python 2 <-!!!
 ### Big thanks to bryand, who wrote the code that I borrowed heavily from/was inspired by
@@ -35,11 +35,11 @@ class TSL2561:
             if (gain==1):
                 self.i2c.write8(0x81, 0x02)     # set gain = 1X and timing = 402 mSec
                 if (self.debug):
-                    print "Setting low gain"
+                    D3.config.logging.info("Setting low gain")
             else:
                 self.i2c.write8(0x81, 0x12)     # set gain = 16X and timing = 402 mSec
                 if (self.debug):
-                    print "Setting high gain"
+                    D3.config.logging.info("Setting high gain")
             self.gain=gain;                     # safe gain for calculation
             time.sleep(self.pause)              # pause for integration (self.pause must be bigger than integration time)
 
@@ -51,10 +51,10 @@ class TSL2561:
             newval = self.i2c.reverseByteOrder(wordval)
 #             print 'newval', newval
             if (self.debug):
-                print("I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, wordval & 0xFFFF, reg))
+                D3.config.logging.debug("I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, wordval & 0xFFFF, reg))
             return newval
         except IOError:
-            print("Error accessing 0x%02X: Check your I2C address" % self.address)
+            D3.config.logging.error("Error accessing 0x%02X: Check your I2C address" % self.address)
 #             print 'read', reg
             return None
 
@@ -75,23 +75,23 @@ class TSL2561:
             IR = self.readIR()
         elif (gain==0): # auto gain
             if (self.debug):
-                print 'Auto gain'
+                D3.config.logging.info('Auto gain')
             self.setGain(16) # first try highGain
             ambient = self.readFull()
             if (self.debug):
-                print 'High gain ambient', ambient
+                D3.config.logging.info('High gain ambient', ambient)
             
             if (ambient < 65535):
                 IR = self.readIR()
                 if (self.debug):
-                    print 'High gain IR', IR
+                    D3.config.logging.info('High gain IR', IR)
             
             if (ambient >= 65535 or IR >= 65535): # value(s) exeed(s) datarange
                 self.setGain(1) # set lowGain
                 ambient = self.readFull()
                 IR = self.readIR()
                 if (self.debug):
-                    print 'Too high, low gain ambient, IR', ambient, IR
+                    D3.config.logging.debug('Too high, low gain ambient, IR', ambient, IR)
             
 
         if (self.gain==1):
@@ -103,8 +103,8 @@ class TSL2561:
             ratio = 1.4
 
         if (self.debug):
-            print "IR Result", IR
-            print "Ambient Result", ambient
+            D3.config.logging.debug("IR Result " + str(IR))
+            D3.config.logging.debug("Ambient Result " + str(ambient))
 
         if ((ratio >= 0) & (ratio <= 0.52)):
             lux = (0.0315 * ambient) - (0.0593 * ambient * (ratio**1.4))

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import smbus
-
+import D3.config
 # ===========================================================================
 # Adafruit_I2C Class
 # ===========================================================================
@@ -47,7 +47,7 @@ class Adafruit_I2C :
     return val
 
   def errMsg(self):
-    print "Error accessing 0x%02X: Check your I2C address" % self.address
+    D3.config.logging.error("Error accessing 0x%02X: Check your I2C address" % self.address)
     return -1
 
   def write8(self, reg, value):
@@ -55,7 +55,7 @@ class Adafruit_I2C :
     try:
       self.bus.write_byte_data(self.address, reg, value)
       if self.debug:
-        print "I2C: Wrote 0x%02X to register 0x%02X" % (value, reg)
+        D3.config.logging.debug("I2C: Wrote 0x%02X to register 0x%02X" % (value, reg))
     except IOError, err:
       return self.errMsg()
 
@@ -64,7 +64,7 @@ class Adafruit_I2C :
     try:
       self.bus.write_word_data(self.address, reg, value)
       if self.debug:
-        print ("I2C: Wrote 0x%02X to register pair 0x%02X,0x%02X" %
+        D3.config.logging.debug ("I2C: Wrote 0x%02X to register pair 0x%02X,0x%02X" %
          (value, reg, reg+1))
     except IOError, err:
       return self.errMsg()
@@ -73,8 +73,8 @@ class Adafruit_I2C :
     "Writes an array of bytes using I2C format"
     try:
       if self.debug:
-        print "I2C: Writing list to register 0x%02X:" % reg
-        print list
+        D3.config.logging.debug("I2C: Writing list to register 0x%02X:" % reg)
+        D3.config.logging.debug(list)
       self.bus.write_i2c_block_data(self.address, reg, list)
     except IOError, err:
       return self.errMsg()
@@ -84,9 +84,9 @@ class Adafruit_I2C :
     try:
       results = self.bus.read_i2c_block_data(self.address, reg, length)
       if self.debug:
-        print ("I2C: Device 0x%02X returned the following from reg 0x%02X" %
+        D3.config.logging.debug("I2C: Device 0x%02X returned the following from reg 0x%02X" %
          (self.address, reg))
-        print results
+        D3.config.logging.debug(results)
       return results
     except IOError, err:
       return self.errMsg()
@@ -96,7 +96,7 @@ class Adafruit_I2C :
     try:
       result = self.bus.read_byte_data(self.address, reg)
       if self.debug:
-        print ("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" %
+        D3.config.logging.debug("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" %
          (self.address, result & 0xFF, reg))
       return result
     except IOError, err:
@@ -108,7 +108,7 @@ class Adafruit_I2C :
       result = self.bus.read_byte_data(self.address, reg)
       if result > 127: result -= 256
       if self.debug:
-        print ("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" %
+        D3.config.logging.debug ("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" %
          (self.address, result & 0xFF, reg))
       return result
     except IOError, err:
@@ -119,7 +119,7 @@ class Adafruit_I2C :
     try:
       result = self.bus.read_word_data(self.address,reg)
       if (self.debug):
-        print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg)
+        D3.config.logging.debug( "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg))
       return result
     except IOError, err:
       return self.errMsg()
@@ -129,7 +129,7 @@ class Adafruit_I2C :
     try:
       result = self.bus.read_word_data(self.address,reg)
       if (self.debug):
-        print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg)
+        D3.config.logging.debug("I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg))
       return result
     except IOError, err:
       return self.errMsg()
@@ -137,6 +137,6 @@ class Adafruit_I2C :
 if __name__ == '__main__':
   try:
     bus = Adafruit_I2C(address=0)
-    print "Default I2C bus is accessible"
+    D3.config.logging.info("Default I2C bus is accessible")
   except:
-    print "Error accessing default I2C bus"
+    D3.config.logging.error("Error accessing default I2C bus")

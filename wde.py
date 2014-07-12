@@ -54,18 +54,18 @@ def isOnlyInstance():
 
 if __name__ == '__main__':
     if not isOnlyInstance():
-        print 'Es kann nur eine Instanz von wde.py laufen.'
+        D3.config.logging.info('Es kann nur eine Instanz von wde.py laufen.')
         sys.exit()
     com_port = '/dev/ttyUSB0'
     ports = map(lambda x: x[0], comports())
     if not com_port in ports:
-        print('Serieller Port nicht gefunden (' + com_port + ')')
-        print('Vorhandene Ports: ' + ', '.join(ports))
+        D3.config.logging.warning('Serieller Port nicht gefunden (' + com_port + ')')
+        D3.config.logging.warning('Vorhandene Ports: ' + ', '.join(ports))
         sys.exit(1)
     try:
         serial = serial.Serial(com_port, baudrate=9600, timeout=180)
     except:
-        print 'Serielle Schnittstelle lässt sich nicht ansprechen'
+        D3.config.logging.error('Serielle Schnittstelle lässt sich nicht ansprechen')
         sys.exit(1)
     string = ''
     try:
@@ -77,8 +77,8 @@ if __name__ == '__main__':
     while True:
         val = parse_line(string)
         if val == None:
-            print 'Keine Daten in den letzten', serial.timeout, 'Sekunden empfangen oder nicht korrekt',
-            print string
+            D3.config.logging.warning('Keine Daten in den letzten', serial.timeout, 'Sekunden empfangen oder nicht korrekt')
+            D3.config.logging.debug(string)
         else:
             found = True
             break
@@ -86,12 +86,13 @@ if __name__ == '__main__':
         try:
             string = serial.readline()
         except:
-            print 'Keine Daten empfangen'    
+            D3.config.logging.warning('Keine Daten empfangen')
         
 #     print string
 #     print val
     if found:
-        print 'Neue Daten empfangen und gespeichert'
+#         print 'Neue Daten empfangen und gespeichert'
+        pass
     val.append(datetime.datetime.now())
     pickle.dump(val, open(D3.config.FULL_BASE_PATH + 'wde.pickle', 'wb'))
     serial.close()
