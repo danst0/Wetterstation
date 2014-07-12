@@ -151,6 +151,7 @@ class Sensoren:
         self.daten['Server']['Temperatur'] = server_temp
 #         self.daten['Server']['Luftdruck'] = server_druck
         self.daten[u'Außen']['Temperatur'] = aussen_temp
+        print(aussen_druck, server_druck)
         self.daten[u'Außen']['Luftdruck'] = (aussen_druck + server_druck) / 2.0
         self.daten[u'Außen']['Licht'] = licht
         
