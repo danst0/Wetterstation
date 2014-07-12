@@ -26,6 +26,8 @@ from D3.Adafruit_BMP085 import BMP085
 from D3.TSL2561 import TSL2561
 import pickle
 
+import D3.mailer
+
 
 
 class Sensoren:
@@ -147,9 +149,22 @@ class Sensoren:
 
         else:
             aussen_temp = None
+            # Wenn aussendruck nicht erfasst werden konnte, dann nur Serverdruck loggen
             aussen_druck = server_druck
-            licht = None   
+            licht = None
+            pers_akt = PERSISTENT_DATA.get('counter_external_sensor_offline')
+            pers_akt += 1
+            if pers_akt >= 10:
+                pers_akt = 0               
+                message = D3.mailer.Message()
+                message.From = "klara@dumke.me"
+                message.To = "daniel@dumke.me"
+                message.Subject = "Fehler beim Lesen der Sensoren"
+                message.Body = """Es gab einen Fehler beim Lesen der Sensoren. Bitte pruefen."""
 
+                mailer = D3.mailer.Mailer('mail.dumke.me')
+                mailer.send(message)
+            PERSISTENT_DATA.set('counter_external_sensor_offline', pers_akt)
     
         self.daten['Server']['Temperatur'] = server_temp
 #         self.daten['Server']['Luftdruck'] = server_druck
@@ -290,6 +305,7 @@ if __name__ == '__main__':
         text += 'DIA'
     if ARGS.kamera:
         text += 'CAM'
+    PERSISTENT_DATA = D3.config.Persistent_Data()
     D3.config.init_logging(text)
     D3.config.logging.info("Starte. Uhrzeit: " + datetime.datetime.now().strftime('%H:%M %d.%m.%Y'))
 #     D3.config.logging.info('Befehlszeile; aktualisieren: {}, diagramme: {}, kamera: {}'.format(ARGS.aktualisieren, ARGS.diagramme, ARGS.kamera))
@@ -324,3 +340,4 @@ if __name__ == '__main__':
         G.close()
 #     print("Beende Wetterstation")
     D.close()
+    PERSISTENT_DATA.close()
