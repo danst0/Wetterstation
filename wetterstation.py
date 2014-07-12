@@ -106,7 +106,7 @@ class Sensoren:
 #         print "Pressure:    %.2f hPa" % (server_druck / 100.0)
 #         print server_temp
 #         print server_druck / 100.0
-
+        pdb.set_trace()
         aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
 #         print aussen_bmp.available()
         if aussen_bmp.available():
