@@ -109,7 +109,7 @@ class Sensoren:
 #         D3.config.logging.debug(server_temp)
 #         D3.config.logging.debug(server_druck / 100.0)
 
-        pdb.set_trace()
+#         pdb.set_trace()
         aussen_bmp = BMP085(0x77, 3, bus=0)  # ULTRAHIRES Mode
 #         D3.config.logging.debug(aussen_bmp.available())
         if aussen_bmp.available():
@@ -147,14 +147,14 @@ class Sensoren:
 
         else:
             aussen_temp = None
-            aussen_druck = None
+            aussen_druck = server_druck
             licht = None   
 
     
         self.daten['Server']['Temperatur'] = server_temp
 #         self.daten['Server']['Luftdruck'] = server_druck
         self.daten[u'Außen']['Temperatur'] = aussen_temp
-        print(aussen_druck, server_druck)
+#         print(aussen_druck, server_druck)
         self.daten[u'Außen']['Luftdruck'] = (aussen_druck + server_druck) / 2.0
         self.daten[u'Außen']['Licht'] = licht
         
