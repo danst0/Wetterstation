@@ -154,8 +154,7 @@ class Sensoren:
             licht = None
             pers_akt = PERSISTENT_DATA.get('counter_external_sensor_offline')
             pers_akt += 1
-            if pers_akt >= 10:
-                pers_akt = 0               
+            if pers_akt == 1:               
                 message = D3.mailer.Message()
                 message.From = "klara@dumke.me"
                 message.To = "daniel@dumke.me"
@@ -164,6 +163,8 @@ class Sensoren:
 
                 mailer = D3.mailer.Mailer('mail.dumke.me')
                 mailer.send(message)
+            elif pers_akt >= 10:
+                pers_akt = 0
             PERSISTENT_DATA.set('counter_external_sensor_offline', pers_akt)
     
         self.daten['Server']['Temperatur'] = server_temp
