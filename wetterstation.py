@@ -6,6 +6,8 @@ Python Wetterstation
 Auslesen, aggregieren, speichern und auswerten von Wetterdaten.
 Aktuell können nur vordefinierte Sensoren (I2C und ELV USB-WDE1) ausgelesen werden.
 Die Speicherung erfolgt in einer SQLite Datenbank, die Auswertung/Darstellung per Web-Schnittstelle.
+
+Der zweite I2C-Bus muss evtl. aktiviert werden. /root/enable_second_i2c.py
 """
 import pdb
 import sys
@@ -148,6 +150,7 @@ class Sensoren:
     #         licht += 1
 
         else:
+            print('Außensensor nicht verfügbar')
             aussen_temp = None
             # Wenn aussendruck nicht erfasst werden konnte, dann nur Serverdruck loggen
             aussen_druck = server_druck
@@ -163,7 +166,7 @@ class Sensoren:
 
                 mailer = D3.mailer.Mailer('mail.dumke.me')
                 mailer.send(message)
-            elif pers_akt >= 10:
+            elif pers_akt >= 40:
                 pers_akt = 0
             PERSISTENT_DATA.set('counter_external_sensor_offline', pers_akt)
     
